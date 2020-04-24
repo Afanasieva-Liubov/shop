@@ -1,6 +1,5 @@
-package afanasievald.uploadingfiles.storage;
+package afanasievald.uploadingPhoto;
 
-import afanasievald.repository.DatasourceHelper;
 import afanasievald.repository.FolderRepository;
 import afanasievald.repository.PhotoRepository;
 import org.springframework.core.io.Resource;
@@ -22,5 +21,4 @@ public interface StorageService {
                                  String foldername,
                                  Integer hashcode);
 
-    void init();
 }

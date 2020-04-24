@@ -1,6 +1,6 @@
 /*https://stackoverflow.com/questions/5905868/how-to-rotate-jpeg-images-based-on-the-orientation-metadata*/
 
-package afanasievald.image;
+package afanasievald.uploadingPhoto.image;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;

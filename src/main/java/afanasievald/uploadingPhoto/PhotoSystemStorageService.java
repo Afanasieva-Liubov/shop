@@ -1,4 +1,4 @@
-package afanasievald.uploadingfiles.storage;
+package afanasievald.uploadingPhoto;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 import afanasievald.databaseEntity.Photo;
 import afanasievald.repository.DatasourceHelper;
-import afanasievald.image.ImageRotation;
+import afanasievald.uploadingPhoto.image.ImageRotation;
 import afanasievald.repository.FolderRepository;
 import afanasievald.repository.PhotoRepository;
 import com.drew.imaging.ImageProcessingException;
@@ -37,42 +37,46 @@ public class PhotoSystemStorageService implements StorageService {
 
     @Override
     public Stream<String> findAllFolders(Path location) {
-        Stream<String> folders = null;
-        if (location != null && Files.exists(location)) {
-            try {
-                folders = Files.walk(location, 1)
-                        .filter(f->!Files.isRegularFile(f))
-                        .filter(path -> !path.equals(location))
-                        .map(location::relativize)
-                        .map(path -> new StringBuilder().append(path.toString()).toString());
-            } catch (IOException e) {
-                throw new StorageException("Failed to read stored folders", e);
-            }
-            finally {
-                return folders;
-            }
+        if (location == null ||
+           !Files.exists(location)) {
+            return null;
         }
-        return folders;
+
+        Stream<String> folders = null;
+        try {
+            folders = Files.walk(location, 1)
+                    .filter(f->!Files.isRegularFile(f))
+                    .filter(path -> !path.equals(location))
+                    .map(location::relativize)
+                    .map(path -> new StringBuilder().append(path.toString()).toString());
+        } catch (IOException e) {
+            throw new StorageException("Failed to read stored folders", e);
+        }
+        finally {
+            return folders;
+        }
     }
 
     @Override
     public Stream<String> findAllPhotos(Path location) {
-        Stream<String> paths = null;
-        if (location != null && Files.exists(location)) {
-            try {
-                paths = Files.walk(location, 1)
-                        .filter(Files::isRegularFile)
-                        .filter(path -> !path.equals(location))
-                        .map(location::relativize)
-                        .map(path -> new StringBuilder().append(path.toString()).toString());
-            } catch (IOException e) {
-                throw new StorageException("Failed to read stored files", e);
-            }
-             finally {
-                return paths;
-            }
+        if (location == null ||
+            !Files.exists(location)) {
+            return null;
         }
-        return paths;
+
+        Stream<String> paths = null;
+        try {
+            paths = Files.walk(location, 1)
+                    .filter(Files::isRegularFile)
+                    .filter(path -> !path.equals(location))
+                    .map(location::relativize)
+                    .map(path -> new StringBuilder().append(path.toString()).toString());
+        } catch (IOException e) {
+            throw new StorageException("Failed to read stored files", e);
+        }
+        finally {
+            return paths;
+        }
     }
 
     @Override
@@ -152,10 +156,5 @@ public class PhotoSystemStorageService implements StorageService {
         finally {
             return fileResource;
         }
-    }
-
-    @Override
-    public void init(){
-        int i = 1;
     }
 }

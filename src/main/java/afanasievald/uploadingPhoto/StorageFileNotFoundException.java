@@ -1,4 +1,4 @@
-package afanasievald.uploadingfiles.storage;
+package afanasievald.uploadingPhoto;
 
 public class StorageFileNotFoundException extends StorageException {
 

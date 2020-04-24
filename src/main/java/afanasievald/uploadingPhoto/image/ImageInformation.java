@@ -1,4 +1,4 @@
-package afanasievald.image;
+package afanasievald.uploadingPhoto.image;
 
 public class ImageInformation {
     public final int orientation;
