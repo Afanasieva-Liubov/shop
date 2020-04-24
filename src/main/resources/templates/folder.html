@@ -1,0 +1,53 @@
+<!-- https://idg.net.ua/blog/uchebnik-css/ispolzovanie-css/praktika-fotogalereya-css -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Photo Gallery — Practice</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/verticalmenustyle.css}"/>
+    <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+    <link rel="stylesheet" th:href="@{/lightbox/css/lightbox.min.css}"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300"/>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1><span th:text="${foldername}"/></h1>
+
+    <div id="gallery">
+        <div class="uploaded" >
+        <form th:action="@{${'/gallery/folder/upload/' + foldername}}" method="post" enctype="multipart/form-data">
+            <input  type="file" name="files" accept="image/*" multiple/>
+            <input type="submit" value="upload"/>
+        </form>
+        </div>
+        <div>
+            <ul>
+                <li th:each="photo : ${photos}">
+                    <figure  class="photo">
+                        <a th:href="@{${'/gallery/folder/' + foldername + '/' + photo.hashcode}}" data-lightbox="roadtrip" th:data-title="${photo.description}">
+                            <img th:src="@{${'/gallery/folder/' + foldername + '/' + photo.hashcode}}" alt=""/>
+                        </a>
+                        <div th:id="${photo.hashcode}" class="holder">
+                            <label class="editable">
+                                <span th:text="${photo.description != null} ? ( ${#strings.trim(photo.description) != ''} ? ${photo.description} : 'Введите описание') : 'Введите описание'"/>
+                            </label>
+                        </div>
+                    </figure>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<script th:src="@{/lightbox/js/lightbox-plus-jquery.min.js}"></script>
+<script th:src="@{/static/jquery/js/jquery-3.5.0.min.js}"></script>
+<script th:src="@{/js/editablelabel.js}"></script>
+</body>
+</html>

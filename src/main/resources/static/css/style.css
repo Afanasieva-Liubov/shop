@@ -1,0 +1,90 @@
+.container {
+    width: 100%; /* ширина блока-контейнера */
+    max-width: 960px; /* максимальная ширина контейнера */
+    margin: 0 auto; /* этот стиль центрирует контейнер */
+}
+
+.editable{
+    text-align: right;
+}
+
+.uploaded {
+    margin-top: 10px;
+    left: 40%;
+    padding: 10px; /* добавляем отступы с каждой стороны */
+}
+
+.photo {
+    margin-top: 20px;
+    float: left; /* говорим элементам выстраиваться один за другим */
+    width: 33.333333%; /* устанавливаем ширину элемента */
+    padding: 10px; /* добавляем отступы с каждой стороны */
+    box-sizing: border-box; /* меняем способ вычисления ширины */
+}
+.photo img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 2px solid #eee;
+    box-sizing: border-box;
+}
+.photo a:hover {
+    opacity: 0.5;
+}
+.photo a {
+    display: block;
+    position: relative;
+}
+.photo a:after {
+    content: '';
+    background: transparent url(../image/icons/eye-icon.png) no-repeat center;
+    width: 52px;
+    height: 35px;
+    position: absolute;
+    margin: auto;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    visibility: hidden;
+}
+.photo:hover > a:after {
+    visibility: visible;
+}
+
+.photo figcaption {
+    color: #999999;
+    text-align: center;
+    margin-top: 20px;
+}
+.photo input {
+    color: #999999;
+    text-align: center;
+    margin-top: 20px;
+    max-width: 100%;
+    height: auto;
+    box-sizing: border-box;
+}
+
+h1 {
+    font-size: 36px;
+    text-transform: uppercase;
+    text-align: center;
+    margin: 30px 0;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    color: #cccccc;
+}
+
+#gallery {
+    margin-left: 23%;
+}
+
+#gallery:after {
+    content: '';
+    display: block;
+    height: 0;
+    clear: both;
+}

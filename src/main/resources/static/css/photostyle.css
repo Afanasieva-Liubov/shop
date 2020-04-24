@@ -1,0 +1,5 @@
+.imagebox {
+    width: 100%;
+    height: 80vh;
+    object-fit: scale-down;
+}
