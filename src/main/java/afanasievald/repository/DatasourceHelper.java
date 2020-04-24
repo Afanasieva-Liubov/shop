@@ -1,4 +1,4 @@
-package afanasievald.datasource;
+package afanasievald.repository;
 
 import afanasievald.databaseEntity.Folder;
 import afanasievald.databaseEntity.Photo;
@@ -11,20 +11,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
-@Service
-public class DatasourceService {
-    public DatasourceService(){
+public class DatasourceHelper {
+    public DatasourceHelper(){
     }
 
 
-    public LinkedHashMap<String, Integer> getFoldersWithPhotoHashcode(FolderRepository folderRepository,
+    public static LinkedHashMap<String, Integer> getFoldersWithPhotoHashcode(FolderRepository folderRepository,
                                                                 PhotoRepository photoRepository){
         Iterable<Folder> folders = folderRepository.findByOrderByCreatedDateAsc();
         LinkedHashMap<String, Integer> foldersWithOnePhoto = new LinkedHashMap<>();
         for(Folder folder: folders){
              List<Photo> photos = photoRepository.findByFolder(folder);
-             photos.sort((x1,x2) -> (x1.getCreatedDate().compareTo(x2.getCreatedDate())));
             if (!photos.isEmpty()){
+                photos.sort((x1,x2) -> (x1.getCreatedDate().compareTo(x2.getCreatedDate())));
                 foldersWithOnePhoto.put(folder.getName(), photos.get(0).getHashcode());
             } else{
                 foldersWithOnePhoto.put(folder.getName(), null);
@@ -33,21 +32,21 @@ public class DatasourceService {
         return foldersWithOnePhoto;
     }
 
-    public List<Photo> getPhotosFromFolder(FolderRepository folderRepository,
+    public static List<Photo> getPhotosFromFolder(FolderRepository folderRepository,
                                                           PhotoRepository photoRepository,
                                                           String foldername){
 
-        List<Photo> photosWithDescription = new ArrayList<>();
+        List<Photo> sortedPhotos = new ArrayList<>();
         Optional<Folder> folder = folderRepository.findByName(foldername);
         if (folder.isPresent()) {
-            photosWithDescription = photoRepository.findByFolder(folder.get());
-            photosWithDescription.sort((x1,x2) -> (x1.getCreatedDate().compareTo(x2.getCreatedDate())));
+            sortedPhotos = photoRepository.findByFolder(folder.get());
+            sortedPhotos.sort((x1,x2) -> (x1.getCreatedDate().compareTo(x2.getCreatedDate())));
         }
-        return photosWithDescription;
+        return sortedPhotos;
     }
 
 
-    public void savePhotoToFolder(FolderRepository folderRepository,
+    public static void savePhotoToFolder(FolderRepository folderRepository,
                                   PhotoRepository photoRepository,
                                   int hashcode,
                                   String foldername,
@@ -66,14 +65,13 @@ public class DatasourceService {
         photoRepository.save(photo);
     }
 
-    public void changeDescription(PhotoRepository photoRepository,
+    public static void changeDescription(PhotoRepository photoRepository,
                                     int hashcode,
                                     String newDescription) throws Exception{
         Optional<Photo> photoOptional= photoRepository.findByHashcode(hashcode);
 
         if (!photoOptional.isPresent()) {
             throw new Exception(String.format("Photo with hashcode %d doesn't exist", hashcode));
-
         }
 
         Photo photo = photoOptional.get();

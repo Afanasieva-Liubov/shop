@@ -2,6 +2,7 @@ package afanasievald.datasource;
 
 import afanasievald.databaseEntity.Folder;
 import afanasievald.databaseEntity.Photo;
+import afanasievald.repository.DatasourceHelper;
 import afanasievald.repository.FolderRepository;
 import afanasievald.repository.PhotoRepository;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringJUnitConfig
 //@SpringBootTest
 @DataJpaTest
-class DatasourceServiceTest {
+class DatasourceHelperTest {
 
     @Autowired
     private PhotoRepository photoRepository;
@@ -26,8 +27,8 @@ class DatasourceServiceTest {
 
     @Test /*Без папок вернуть пустой объект>*/
     void getFoldersWithPhotoHashcode_EmptyFolders() {
-        DatasourceService datasourceService = new DatasourceService();
-        LinkedHashMap<String, Integer> folders = datasourceService.getFoldersWithPhotoHashcode(folderRepository, photoRepository);
+        DatasourceHelper datasourceHelper = new DatasourceHelper();
+        LinkedHashMap<String, Integer> folders = datasourceHelper.getFoldersWithPhotoHashcode(folderRepository, photoRepository);
 
         assertNotNull(folders);
         assertEquals(true, folders.isEmpty());
@@ -36,12 +37,12 @@ class DatasourceServiceTest {
     /*Добавить виртуальные папки, папки вернуть отсортированные по дате*/
     @Test
     void getFoldersWithPhotoHashcode_SortedFolders() {
-        DatasourceService datasourceService = new DatasourceService();
+        DatasourceHelper datasourceHelper = new DatasourceHelper();
 
         Folder folder2 = folderRepository.save(new Folder("test2", new Date(2000L)));
         Folder folder1 = folderRepository.save(new Folder("test1", new Date(1000L)));
 
-        LinkedHashMap<String, Integer> foundFolders = datasourceService.getFoldersWithPhotoHashcode(folderRepository, photoRepository);
+        LinkedHashMap<String, Integer> foundFolders = datasourceHelper.getFoldersWithPhotoHashcode(folderRepository, photoRepository);
 
         assertNotNull(foundFolders);
         assertEquals(2, foundFolders.size());
@@ -53,11 +54,11 @@ class DatasourceServiceTest {
     /*Добавить виртуальные папки без фото, вернуть папки с пустыми хешкодами*/
     @Test
     void getFoldersWithPhotoHashcode_EmptyPhotos() {
-        DatasourceService datasourceService = new DatasourceService();
+        DatasourceHelper datasourceHelper = new DatasourceHelper();
 
         folderRepository.save(new Folder("test"));
 
-        LinkedHashMap<String, Integer> foundFolders = datasourceService.getFoldersWithPhotoHashcode(folderRepository, photoRepository);
+        LinkedHashMap<String, Integer> foundFolders = datasourceHelper.getFoldersWithPhotoHashcode(folderRepository, photoRepository);
 
         assertNotNull(foundFolders);
         assertEquals(1, foundFolders.size());
@@ -69,13 +70,13 @@ class DatasourceServiceTest {
     /*Добавить 1 виртуальную папку, вирт фото вернуть c наименьшей датой*/
     @Test
     void getFoldersWithPhotoHashcode_SortedPhotos() {
-        DatasourceService datasourceService = new DatasourceService();
+        DatasourceHelper datasourceHelper = new DatasourceHelper();
 
         Folder folder = folderRepository.save(new Folder("test"));
         Photo photo2 = photoRepository.save(new Photo(2, folder, "test", null, new Date(2000L)));
         Photo photo1 = photoRepository.save(new Photo(1, folder, "test", null, new Date(1000L)));
 
-        LinkedHashMap<String, Integer> foundFolders = datasourceService.getFoldersWithPhotoHashcode(folderRepository, photoRepository);
+        LinkedHashMap<String, Integer> foundFolders = datasourceHelper.getFoldersWithPhotoHashcode(folderRepository, photoRepository);
 
         assertNotNull(foundFolders);
         assertEquals(1, foundFolders.size());
@@ -88,8 +89,8 @@ class DatasourceServiceTest {
     void getPhotosFromFolder_EmptyFolder() {
         Folder folder = folderRepository.save(new Folder("test"));
 
-        DatasourceService datasourceService = new DatasourceService();
-        List<Photo> photos = datasourceService.getPhotosFromFolder(folderRepository, photoRepository, folder.getName());
+        DatasourceHelper datasourceHelper = new DatasourceHelper();
+        List<Photo> photos = datasourceHelper.getPhotosFromFolder(folderRepository, photoRepository, folder.getName());
 
         assertNotNull(photos);
         assertEquals(true, photos.isEmpty());
@@ -102,8 +103,8 @@ class DatasourceServiceTest {
         Photo photo2 = photoRepository.save(new Photo(2, folder, "test", null, new Date(2000L)));
         Photo photo1 = photoRepository.save(new Photo(1, folder, "test", null, new Date(1000L)));
 
-        DatasourceService datasourceService = new DatasourceService();
-        List<Photo> photos = datasourceService.getPhotosFromFolder(folderRepository, photoRepository, folder.getName());
+        DatasourceHelper datasourceHelper = new DatasourceHelper();
+        List<Photo> photos = datasourceHelper.getPhotosFromFolder(folderRepository, photoRepository, folder.getName());
 
         assertNotNull(photos);
         assertEquals(2, photos.size());
@@ -113,9 +114,9 @@ class DatasourceServiceTest {
 
     @Test
     void savePhotoToFolder_NotExistedFolder() throws Exception {
-        DatasourceService datasourceService = new DatasourceService();
+        DatasourceHelper datasourceHelper = new DatasourceHelper();
         Exception exception = assertThrows(Exception.class, () -> {
-            datasourceService.savePhotoToFolder(folderRepository, photoRepository, 1, "not existed folder", "filename");
+            datasourceHelper.savePhotoToFolder(folderRepository, photoRepository, 1, "not existed folder", "filename");
         });
     }
 
@@ -124,9 +125,9 @@ class DatasourceServiceTest {
         Folder folder = folderRepository.save(new Folder("test"));
         Photo photo = photoRepository.save(new Photo(1, folder, "filename1", null, new Date(1000L)));
 
-        DatasourceService datasourceService = new DatasourceService();
+        DatasourceHelper datasourceHelper = new DatasourceHelper();
         Exception exception = assertThrows(Exception.class, () -> {
-            datasourceService.savePhotoToFolder(folderRepository, photoRepository, photo.getHashcode(), folder.getName(), photo.getName());
+            datasourceHelper.savePhotoToFolder(folderRepository, photoRepository, photo.getHashcode(), folder.getName(), photo.getName());
         });
     }
 
@@ -134,8 +135,8 @@ class DatasourceServiceTest {
     void savePhotoToFolder() throws Exception {
         Folder folder = folderRepository.save(new Folder("test"));
 
-        DatasourceService datasourceService = new DatasourceService();
-        datasourceService.savePhotoToFolder(folderRepository, photoRepository, 1, folder.getName(), "filename");
+        DatasourceHelper datasourceHelper = new DatasourceHelper();
+        datasourceHelper.savePhotoToFolder(folderRepository, photoRepository, 1, folder.getName(), "filename");
 
         Optional<Photo> photo = photoRepository.findByHashcode(1);
         assertEquals(true, photo.isPresent());
@@ -143,9 +144,9 @@ class DatasourceServiceTest {
 
     @Test
     void changeDescription_NotExistedPhoto() {
-        DatasourceService datasourceService = new DatasourceService();
+        DatasourceHelper datasourceHelper = new DatasourceHelper();
         Exception exception = assertThrows(Exception.class, () -> {
-            datasourceService.changeDescription(photoRepository, 1, "not existed photo");
+            datasourceHelper.changeDescription(photoRepository, 1, "not existed photo");
         });
     }
 
@@ -154,9 +155,9 @@ class DatasourceServiceTest {
         Folder folder = folderRepository.save(new Folder("test1002"));
         Photo photo = photoRepository.save(new Photo(2, folder, "test", null, new Date(1000L)));
 
-        DatasourceService datasourceService = new DatasourceService();
+        DatasourceHelper datasourceHelper = new DatasourceHelper();
         String newdescription = "new description";
-        datasourceService.changeDescription(photoRepository, photo.getHashcode(), newdescription);
+        datasourceHelper.changeDescription(photoRepository, photo.getHashcode(), newdescription);
 
         Optional<Photo> photoWithNewDescription = photoRepository.findByHashcode(photo.getHashcode());
         assertEquals(newdescription, photoWithNewDescription.get().getDescription());

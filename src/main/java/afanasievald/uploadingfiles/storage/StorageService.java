@@ -1,6 +1,6 @@
 package afanasievald.uploadingfiles.storage;
 
-import afanasievald.datasource.DatasourceService;
+import afanasievald.repository.DatasourceHelper;
 import afanasievald.repository.FolderRepository;
 import afanasievald.repository.PhotoRepository;
 import org.springframework.core.io.Resource;
@@ -16,10 +16,11 @@ public interface StorageService {
     StringBuilder uploadPhotos(FolderRepository folderRepository,
                                PhotoRepository photoRepository,
                                String foldername,
-                               MultipartFile[] files,
-                               DatasourceService datasourceService) throws Exception;
+                               MultipartFile[] files) throws Exception;
 
-    Resource loadPhotoAsResource(String filename);
+    Resource loadPhotoAsResource(PhotoRepository photoRepository,
+                                 String foldername,
+                                 Integer hashcode);
 
     void init();
 }

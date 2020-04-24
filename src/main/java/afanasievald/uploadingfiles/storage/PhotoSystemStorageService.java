@@ -5,8 +5,11 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.stream.Stream;
-import afanasievald.datasource.DatasourceService;
+
+import afanasievald.databaseEntity.Photo;
+import afanasievald.repository.DatasourceHelper;
 import afanasievald.image.ImageRotation;
 import afanasievald.repository.FolderRepository;
 import afanasievald.repository.PhotoRepository;
@@ -76,8 +79,7 @@ public class PhotoSystemStorageService implements StorageService {
     public StringBuilder uploadPhotos(FolderRepository folderRepository,
                                       PhotoRepository photoRepository,
                                       String foldername,
-                                      MultipartFile[] files,
-                                      DatasourceService datasourceService)throws Exception {
+                                      MultipartFile[] files)throws Exception {
         StringBuilder fileNames = new StringBuilder();
         for (MultipartFile file : files) {
             try {
@@ -93,7 +95,7 @@ public class PhotoSystemStorageService implements StorageService {
                     Path newFileNameAndPath = Paths.get(String.format("%s/%s", photoLocation, foldername),
                             newFileName);
                     Files.write(newFileNameAndPath, content);
-                    datasourceService.savePhotoToFolder(folderRepository,
+                    DatasourceHelper.savePhotoToFolder(folderRepository,
                             photoRepository,
                             content.hashCode(),
                             foldername,
@@ -121,7 +123,17 @@ public class PhotoSystemStorageService implements StorageService {
     }
 
     @Override
-    public Resource loadPhotoAsResource(String filename) {
+    public Resource loadPhotoAsResource(PhotoRepository photoRepository,
+                                        String foldername,
+                                        Integer hashcode) {
+        Optional<Photo> photo = photoRepository.findByHashcode(hashcode);
+        if (foldername == null ||
+                foldername.compareTo("") == 1 ||
+                !photo.isPresent()) {
+            return null;
+        }
+
+        String filename = String.format("%s/%s", foldername, photo.get().getName());
         Resource fileResource = null;
         try {
             Path file = photoLocationPath.resolve(filename);

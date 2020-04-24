@@ -1,7 +1,7 @@
 package afanasievald.controller;
 
 import afanasievald.databaseEntity.Photo;
-import afanasievald.datasource.DatasourceService;
+import afanasievald.repository.DatasourceHelper;
 import afanasievald.repository.FolderRepository;
 import afanasievald.repository.PhotoRepository;
 import afanasievald.uploadingfiles.storage.StorageFileNotFoundException;
@@ -19,12 +19,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class WorkController {
     private final StorageService storageService;
-    private final DatasourceService datasourceService;
 
     @Autowired
     private PhotoRepository photoRepository;
@@ -35,7 +33,6 @@ public class WorkController {
     @Autowired
     public WorkController(StorageService storageService) {
         this.storageService = storageService;
-        this.datasourceService = new DatasourceService();
     }
 
     @GetMapping("/test")
@@ -45,7 +42,7 @@ public class WorkController {
 
     @GetMapping("/gallery")
     public String viewPhoto(Model model) {
-        LinkedHashMap<String, Integer> folders = datasourceService.getFoldersWithPhotoHashcode(folderRepository, photoRepository);
+        LinkedHashMap<String, Integer> folders = DatasourceHelper.getFoldersWithPhotoHashcode(folderRepository, photoRepository);
         if (!folders.isEmpty()) {
             model.addAttribute("folders", folders.keySet());
             model.addAttribute("foldersAndPhotos", folders);
@@ -55,21 +52,19 @@ public class WorkController {
 
     @GetMapping("/gallery/folder/{foldername}/{hashcode}")
     public ResponseEntity<Resource> showOneFoto(@PathVariable String foldername,
-                                                @PathVariable Integer hashcode,
-                                                Model model) {
-        Optional<Photo> photo = photoRepository.findByHashcode(hashcode);
-        if (photo.isPresent()) {
-            Resource fileResource = storageService.loadPhotoAsResource(String.format("%s/%s", foldername, photo.get().getName()));
+                                                @PathVariable Integer hashcode) {
+            Resource fileResource = storageService.loadPhotoAsResource(photoRepository, foldername, hashcode);
+            if (fileResource == null){
+                return null;
+            }
             return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=\"" + fileResource.getFilename() + "\"").body(fileResource);
-        }
-        return null;
     }
 
     @GetMapping("/gallery/folder/{foldername}")
     public String viewPhotoInFolder(@PathVariable String foldername,
                                     Model model) {
-        List<Photo> photos = datasourceService.getPhotosFromFolder(folderRepository, photoRepository, foldername);
+        List<Photo> photos = DatasourceHelper.getPhotosFromFolder(folderRepository, photoRepository, foldername);
         if (!photos.isEmpty()) {
             model.addAttribute("photos", photos);
         }
@@ -85,8 +80,7 @@ public class WorkController {
         StringBuilder fileNames = storageService.uploadPhotos(folderRepository,
                 photoRepository,
                 foldername,
-                files,
-                datasourceService);
+                files);
         return "redirect:/gallery/folder/{foldername}";
     }
 
@@ -94,7 +88,7 @@ public class WorkController {
     @PostMapping("/photo/changedescription")
     public ResponseEntity changeDescription(@RequestBody Photo photo,
                                             Errors errors) throws Exception{
-        datasourceService.changeDescription(photoRepository,
+        DatasourceHelper.changeDescription(photoRepository,
                 photo.getHashcode(),
                 photo.getDescription());
         return new ResponseEntity<>("", HttpStatus.OK);
