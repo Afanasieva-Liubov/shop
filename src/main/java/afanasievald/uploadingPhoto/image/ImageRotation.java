@@ -20,8 +20,8 @@ public class ImageRotation {
         Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
         JpegDirectory jpegDirectory = metadata.getFirstDirectoryOfType(JpegDirectory.class);
 
-        int orientation = 1;
         if (directory != null) {
+            int orientation;
             try {
                 orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
             } catch (MetadataException me) {

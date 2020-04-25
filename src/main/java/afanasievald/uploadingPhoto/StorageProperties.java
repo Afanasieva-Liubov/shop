@@ -13,7 +13,6 @@ public class StorageProperties {
      * Folder location for storing files
      */
     private String photoLocation;
-;
     private String photoDisc;
 
     public StorageProperties() {

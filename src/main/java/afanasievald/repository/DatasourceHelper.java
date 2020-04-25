@@ -2,29 +2,23 @@ package afanasievald.repository;
 
 import afanasievald.databaseEntity.Folder;
 import afanasievald.databaseEntity.Photo;
-import afanasievald.repository.FolderRepository;
-import afanasievald.repository.PhotoRepository;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class DatasourceHelper {
     public DatasourceHelper(){
     }
 
 
-    public static LinkedHashMap<String, Integer> getFoldersWithPhotoHashcode(FolderRepository folderRepository,
-                                                                PhotoRepository photoRepository){
+    public static LinkedHashMap<String, Integer> getFoldersWithPhotoIdentifier(FolderRepository folderRepository,
+                                                                               PhotoRepository photoRepository){
         Iterable<Folder> folders = folderRepository.findByOrderByCreatedDateAsc();
         LinkedHashMap<String, Integer> foldersWithOnePhoto = new LinkedHashMap<>();
         for(Folder folder: folders){
              List<Photo> photos = photoRepository.findByFolder(folder);
             if (!photos.isEmpty()){
-                photos.sort((x1,x2) -> (x1.getCreatedDate().compareTo(x2.getCreatedDate())));
-                foldersWithOnePhoto.put(folder.getName(), photos.get(0).getHashcode());
+                photos.sort(Comparator.comparing(Photo::getCreatedDate));
+                foldersWithOnePhoto.put(folder.getName(), photos.get(0).getIdentifier());
             } else{
                 foldersWithOnePhoto.put(folder.getName(), null);
             }
@@ -40,7 +34,7 @@ public class DatasourceHelper {
         Optional<Folder> folder = folderRepository.findByName(foldername);
         if (folder.isPresent()) {
             sortedPhotos = photoRepository.findByFolder(folder.get());
-            sortedPhotos.sort((x1,x2) -> (x1.getCreatedDate().compareTo(x2.getCreatedDate())));
+            sortedPhotos.sort(Comparator.comparing(Photo::getCreatedDate));
         }
         return sortedPhotos;
     }
@@ -48,7 +42,7 @@ public class DatasourceHelper {
 
     public static void savePhotoToFolder(FolderRepository folderRepository,
                                   PhotoRepository photoRepository,
-                                  int hashcode,
+                                  int identifier,
                                   String foldername,
                                   String filename) throws Exception{
         Optional<Folder> folder = folderRepository.findByName(foldername);
@@ -56,22 +50,22 @@ public class DatasourceHelper {
             throw new Exception(String.format("Folder %s doesn't exist", foldername));
         }
 
-        Optional<Photo> optPhoto = photoRepository.findByHashcode(hashcode);
+        Optional<Photo> optPhoto = photoRepository.findByIdentifier(identifier);
         if (optPhoto.isPresent()){
-            throw new Exception(String.format("Photo with hashcode %d exists", hashcode));
+            throw new Exception(String.format("Photo with identifier %d exists", identifier));
         }
 
-        Photo photo = new Photo(hashcode, folder.get(), filename, null);
+        Photo photo = new Photo(identifier, folder.get(), filename, null);
         photoRepository.save(photo);
     }
 
     public static void changeDescription(PhotoRepository photoRepository,
-                                    int hashcode,
+                                    int identifier,
                                     String newDescription) throws Exception{
-        Optional<Photo> photoOptional= photoRepository.findByHashcode(hashcode);
+        Optional<Photo> photoOptional= photoRepository.findByIdentifier(identifier);
 
         if (!photoOptional.isPresent()) {
-            throw new Exception(String.format("Photo with hashcode %d doesn't exist", hashcode));
+            throw new Exception(String.format("Photo with identifier %d doesn't exist", identifier));
         }
 
         Photo photo = photoOptional.get();

@@ -32,7 +32,7 @@ $('.holder').on('click', "label.editable", function() {
 
 function change_description(parentNode, newdescription) {
     var photo = {}
-    photo["hashcode"] = parentNode.attr('id');
+    photo["identifier"] = parentNode.attr('id');
     photo["description"] = newdescription;
 
     $.ajax({

@@ -162,12 +162,12 @@ class WorkControllerTest {
     @Test
     void changeDescription_ExistingPhoto() throws Exception {
         Photo photo = new Photo(1, null,"photo", null);
-        when(photoRepository.findByHashcode(1)).thenReturn(Optional.of(photo));
+        when(photoRepository.findByIdentifier(1)).thenReturn(Optional.of(photo));
         when(photoRepository.save(photo)).thenReturn(photo);
         mockMvc
                 .perform(post("/photo/changedescription")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content("{\"hashcode\":1,\"description\":\"description\"}"))
+                .content("{\"identifier\":1,\"description\":\"description\"}"))
                 .andExpect(status().isOk());
     }
 

@@ -8,10 +8,10 @@ public class Photo {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(unique = true, nullable = false)
-    private Integer id;
+    private int id;
 
     @Column(unique = true)
-    private Integer hashcode;
+    private int identifier;
 
     @ManyToOne
     private Folder folder;
@@ -28,32 +28,32 @@ public class Photo {
     public Photo() {
     }
 
-    public Photo(Integer hashcode, Folder folder,  String name, String description){
-        this.hashcode = hashcode;
+    public Photo(int identifier, Folder folder, String name, String description){
+        this.identifier = identifier;
         this.folder = folder;
         this.name = name;
         this.description = description;
         this.createdDate = new Date();
     }
 
-    public Photo(Integer hashcode, Folder folder,  String name, String description, Date createdDate){
-        this.hashcode = hashcode;
+    public Photo(int identifier, Folder folder, String name, String description, Date createdDate){
+        this.identifier = identifier;
         this.folder = folder;
         this.name = name;
         this.description = description;
         this.createdDate = createdDate;
     }
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public Integer getHashcode() {
-        return hashcode;
+    public int getIdentifier() {
+        return identifier;
     }
 
-    public void setHashcode(Integer hashcode) {
-        this.hashcode = hashcode;
+    public void setIdentifier(int identifier) {
+        this.identifier = identifier;
     }
 
     public Folder getFolder() {

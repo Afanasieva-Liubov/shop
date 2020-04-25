@@ -19,7 +19,7 @@ public class Folder {
     private Date createdDate;
 
     @OneToMany(mappedBy = "folder")
-    private List<Photo> photos = new ArrayList<Photo>();
+    private List<Photo> photos = new ArrayList<>();
 
     public Folder() {
     }
