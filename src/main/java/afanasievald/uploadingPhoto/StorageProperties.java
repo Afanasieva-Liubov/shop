@@ -13,14 +13,12 @@ public class StorageProperties {
      * Folder location for storing files
      */
     private String photoLocation;
-    private String photoDisc;
 
     public StorageProperties() {
     }
 
-    public StorageProperties(String photoLocation, String photoDisc) {
+    public StorageProperties(String photoLocation) {
         this.photoLocation = photoLocation;
-        this.photoDisc = photoDisc;
     }
 
     public String getPhotoLocation() {
@@ -29,13 +27,5 @@ public class StorageProperties {
 
     public void setPhotoLocation(String photoLocation) {
         this.photoLocation = photoLocation;
-    }
-
-    public String getPhotoDisc() {
-        return photoDisc;
-    }
-
-    public void setPhotoDisc(String photoDisc) {
-        this.photoDisc = photoDisc;
     }
 }

@@ -6,11 +6,7 @@ import java.util.Date;
 @Entity
 public class Photo {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(unique = true, nullable = false)
-    private int id;
-
-    @Column(unique = true)
     private int identifier;
 
     @ManyToOne
@@ -42,10 +38,6 @@ public class Photo {
         this.name = name;
         this.description = description;
         this.createdDate = createdDate;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public int getIdentifier() {

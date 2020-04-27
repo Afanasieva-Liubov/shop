@@ -1,6 +1,6 @@
 package afanasievald.uploadingPhoto.image;
 
-public class ImageInformation {
+public final class ImageInformation {
     public final int orientation;
     public final int width;
     public final int height;

@@ -10,13 +10,13 @@ import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import javaxt.io.Image;
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 public class ImageRotation {
 
-    private ImageInformation readImageInformation(File imageFile)  throws IOException, MetadataException, ImageProcessingException {
-        Metadata metadata = ImageMetadataReader.readMetadata(imageFile);
+    private static ImageInformation readImageInformation(byte[] byteArray)  throws IOException, MetadataException, ImageProcessingException {
+        Metadata metadata = ImageMetadataReader.readMetadata(new ByteArrayInputStream(byteArray));
         Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
         JpegDirectory jpegDirectory = metadata.getFirstDirectoryOfType(JpegDirectory.class);
 
@@ -36,18 +36,17 @@ public class ImageRotation {
         }
     }
 
-    public void rotateImage(String imageDownloadFilename) throws IOException, MetadataException, ImageProcessingException{
-        File imageDownloadFile =  new File(imageDownloadFilename);
-        Image image = new Image(imageDownloadFile);
-        ImageInformation imageInformation = readImageInformation(imageDownloadFile);
+    public static byte[] normalizeOrientation(byte[] byteArray) throws IOException, MetadataException, ImageProcessingException{
+        Image image = new Image(byteArray);
+        ImageInformation imageInformation = readImageInformation(byteArray);
         if (imageInformation != null) {
             rotate(imageInformation, image);
         }
         image.setOutputQuality(99);
-        image.saveAs(imageDownloadFile);
+        return image.getByteArray();
     }
 
-    private void rotate(ImageInformation info, Image image) {
+    private static void rotate(ImageInformation info, Image image) {
         switch(info.orientation) {
             case 1:
                 return;

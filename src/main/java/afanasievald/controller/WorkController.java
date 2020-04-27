@@ -9,13 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.LinkedHashMap;
-import java.util.List;
+
+import java.util.*;
 
 @Controller
 public class WorkController {
@@ -48,14 +49,23 @@ public class WorkController {
     }
 
     @GetMapping("/gallery/folder/{foldername}/{identifier}")
-    public ResponseEntity<Resource> showOneFoto(@PathVariable String foldername,
-                                                @PathVariable int identifier) {
-            Resource fileResource = storageService.loadPhotoAsResource(photoRepository, foldername, identifier);
-            if (fileResource == null){
-                return null;
-            }
-            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=\"" + fileResource.getFilename() + "\"").body(fileResource);
+    public ResponseEntity<byte[]> showOneFoto(@PathVariable String foldername,
+                                              @PathVariable int identifier) throws Exception {
+        Optional<Photo> photo = photoRepository.findByIdentifier(identifier);
+        if (!photo.isPresent()) {
+            return null;
+        }
+
+        byte[] byteArray = storageService.loadPhotoAsResource(foldername, photo.get().getName());
+        if (byteArray == null) {
+            return null;
+        }
+
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + photo.get().getName() + "\"")
+                .body(byteArray);
     }
 
     @GetMapping("/gallery/folder/{foldername}")
@@ -69,20 +79,26 @@ public class WorkController {
         return "folder";
     }
 
-
     @PostMapping("/gallery/folder/upload/{foldername}")
     public String uploadPhoto(@PathVariable String foldername,
                               @RequestParam("files") MultipartFile[] files) throws Exception {
-        storageService.uploadPhotos(folderRepository,
-                photoRepository,
-                foldername,
-                files);
+        for (MultipartFile file : files) {
+            byte[] content = file.getBytes();
+            String newFileName = storageService.uploadPhotos(foldername, file.getOriginalFilename(), content);
+            if (newFileName != null) {
+                DatasourceHelper.savePhotoToFolder(folderRepository,
+                        photoRepository,
+                        Arrays.hashCode(content),
+                        foldername,
+                        newFileName);
+            }
+        }
         return "redirect:/gallery/folder/{foldername}";
     }
 
 
     @PostMapping("/photo/changedescription")
-    public ResponseEntity changeDescription(@RequestBody Photo photo) throws Exception{
+    public ResponseEntity changeDescription(@RequestBody Photo photo) throws Exception {
         DatasourceHelper.changeDescription(photoRepository,
                 photo.getIdentifier(),
                 photo.getDescription());

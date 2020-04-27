@@ -26,8 +26,7 @@ class DatasourceHelperTest {
 
     @Test /*Без папок вернуть пустой объект>*/
     void getFoldersWithPhotoIdentifier_EmptyFolders() {
-        DatasourceHelper datasourceHelper = new DatasourceHelper();
-        LinkedHashMap<String, Integer> folders = datasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
+        LinkedHashMap<String, Integer> folders = DatasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
 
         assertNotNull(folders);
         assertEquals(true, folders.isEmpty());
@@ -36,12 +35,10 @@ class DatasourceHelperTest {
     /*Добавить виртуальные папки, папки вернуть отсортированные по дате*/
     @Test
     void getFoldersWithPhotoIdentifier_SortedFolders() {
-        DatasourceHelper datasourceHelper = new DatasourceHelper();
-
         Folder folder2 = folderRepository.save(new Folder("test2", new Date(2000L)));
         Folder folder1 = folderRepository.save(new Folder("test1", new Date(1000L)));
 
-        LinkedHashMap<String, Integer> foundFolders = datasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
+        LinkedHashMap<String, Integer> foundFolders = DatasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
 
         assertNotNull(foundFolders);
         assertEquals(2, foundFolders.size());
@@ -53,11 +50,9 @@ class DatasourceHelperTest {
     /*Добавить виртуальные папки без фото, вернуть папки с пустыми хешкодами*/
     @Test
     void getFoldersWithPhotoIdentifier_EmptyPhotos() {
-        DatasourceHelper datasourceHelper = new DatasourceHelper();
-
         folderRepository.save(new Folder("test"));
 
-        LinkedHashMap<String, Integer> foundFolders = datasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
+        LinkedHashMap<String, Integer> foundFolders = DatasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
 
         assertNotNull(foundFolders);
         assertEquals(1, foundFolders.size());
@@ -69,13 +64,11 @@ class DatasourceHelperTest {
     /*Добавить 1 виртуальную папку, вирт фото вернуть c наименьшей датой*/
     @Test
     void getFoldersWithPhotoIdentifier_SortedPhotos() {
-        DatasourceHelper datasourceHelper = new DatasourceHelper();
-
         Folder folder = folderRepository.save(new Folder("test"));
         Photo photo2 = photoRepository.save(new Photo(2, folder, "test", null, new Date(2000L)));
         Photo photo1 = photoRepository.save(new Photo(1, folder, "test", null, new Date(1000L)));
 
-        LinkedHashMap<String, Integer> foundFolders = datasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
+        LinkedHashMap<String, Integer> foundFolders = DatasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
 
         assertNotNull(foundFolders);
         assertEquals(1, foundFolders.size());
@@ -88,8 +81,7 @@ class DatasourceHelperTest {
     void getPhotosFromFolder_EmptyFolder() {
         Folder folder = folderRepository.save(new Folder("test"));
 
-        DatasourceHelper datasourceHelper = new DatasourceHelper();
-        List<Photo> photos = datasourceHelper.getPhotosFromFolder(folderRepository, photoRepository, folder.getName());
+        List<Photo> photos = DatasourceHelper.getPhotosFromFolder(folderRepository, photoRepository, folder.getName());
 
         assertNotNull(photos);
         assertEquals(true, photos.isEmpty());
@@ -102,20 +94,18 @@ class DatasourceHelperTest {
         Photo photo2 = photoRepository.save(new Photo(2, folder, "test", null, new Date(2000L)));
         Photo photo1 = photoRepository.save(new Photo(1, folder, "test", null, new Date(1000L)));
 
-        DatasourceHelper datasourceHelper = new DatasourceHelper();
-        List<Photo> photos = datasourceHelper.getPhotosFromFolder(folderRepository, photoRepository, folder.getName());
+        List<Photo> photos = DatasourceHelper.getPhotosFromFolder(folderRepository, photoRepository, folder.getName());
 
         assertNotNull(photos);
         assertEquals(2, photos.size());
-        assertEquals(photo1.getId(), photos.get(0).getId());
-        assertEquals(photo2.getId(), photos.get(1).getId());
+        assertEquals(photo1.getIdentifier(), photos.get(0).getIdentifier());
+        assertEquals(photo2.getIdentifier(), photos.get(1).getIdentifier());
     }
 
     @Test
     void savePhotoToFolder_NotExistedFolder() throws Exception {
-        DatasourceHelper datasourceHelper = new DatasourceHelper();
         Exception exception = assertThrows(Exception.class, () -> {
-            datasourceHelper.savePhotoToFolder(folderRepository, photoRepository, 1, "not existed folder", "filename");
+            DatasourceHelper.savePhotoToFolder(folderRepository, photoRepository, 1, "not existed folder", "filename");
         });
     }
 
@@ -124,9 +114,8 @@ class DatasourceHelperTest {
         Folder folder = folderRepository.save(new Folder("test"));
         Photo photo = photoRepository.save(new Photo(1, folder, "filename1", null, new Date(1000L)));
 
-        DatasourceHelper datasourceHelper = new DatasourceHelper();
         Exception exception = assertThrows(Exception.class, () -> {
-            datasourceHelper.savePhotoToFolder(folderRepository, photoRepository, photo.getIdentifier(), folder.getName(), photo.getName());
+            DatasourceHelper.savePhotoToFolder(folderRepository, photoRepository, photo.getIdentifier(), folder.getName(), photo.getName());
         });
     }
 
@@ -134,8 +123,7 @@ class DatasourceHelperTest {
     void savePhotoToFolder() throws Exception {
         Folder folder = folderRepository.save(new Folder("test"));
 
-        DatasourceHelper datasourceHelper = new DatasourceHelper();
-        datasourceHelper.savePhotoToFolder(folderRepository, photoRepository, 1, folder.getName(), "filename");
+        DatasourceHelper.savePhotoToFolder(folderRepository, photoRepository, 1, folder.getName(), "filename");
 
         Optional<Photo> photo = photoRepository.findByIdentifier(1);
         assertEquals(true, photo.isPresent());
@@ -143,9 +131,8 @@ class DatasourceHelperTest {
 
     @Test
     void changeDescription_NotExistedPhoto() {
-        DatasourceHelper datasourceHelper = new DatasourceHelper();
         Exception exception = assertThrows(Exception.class, () -> {
-            datasourceHelper.changeDescription(photoRepository, 1, "not existed photo");
+            DatasourceHelper.changeDescription(photoRepository, 1, "not existed photo");
         });
     }
 
@@ -154,9 +141,8 @@ class DatasourceHelperTest {
         Folder folder = folderRepository.save(new Folder("test1002"));
         Photo photo = photoRepository.save(new Photo(2, folder, "test", null, new Date(1000L)));
 
-        DatasourceHelper datasourceHelper = new DatasourceHelper();
         String newdescription = "new description";
-        datasourceHelper.changeDescription(photoRepository, photo.getIdentifier(), newdescription);
+        DatasourceHelper.changeDescription(photoRepository, photo.getIdentifier(), newdescription);
 
         Optional<Photo> photoWithNewDescription = photoRepository.findByIdentifier(photo.getIdentifier());
         assertEquals(newdescription, photoWithNewDescription.get().getDescription());
