@@ -30,6 +30,7 @@ public class Folder {
 
     public Folder(String name, Date createdDate){
         this.name = name;
+        this.createdDate = createdDate;
     }
 
     public int getId() {

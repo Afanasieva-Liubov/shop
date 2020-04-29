@@ -9,10 +9,10 @@ public class DatasourceHelper {
     public DatasourceHelper() {
     }
 
-    public static LinkedHashMap<String, Long> getFoldersWithPhotoIdentifier(FolderRepository folderRepository,
+    public static Map<String, Long> getFoldersWithPhotoIdentifier(FolderRepository folderRepository,
                                                                             PhotoRepository photoRepository) {
         Iterable<Folder> folders = folderRepository.findByOrderByCreatedDateAsc();
-        LinkedHashMap<String, Long> foldersWithOnePhoto = new LinkedHashMap<>();
+        Map<String, Long> foldersWithOnePhoto = new LinkedHashMap<>();
         for (Folder folder : folders) {
             List<Photo> photos = photoRepository.findByFolder(folder);
             if (!photos.isEmpty()) {
@@ -27,24 +27,30 @@ public class DatasourceHelper {
 
     public static List<Photo> getPhotosFromFolder(FolderRepository folderRepository,
                                                   PhotoRepository photoRepository,
-                                                  String foldername) {
-        List<Photo> sortedPhotos = new ArrayList<>();
-        Optional<Folder> folder = folderRepository.findByName(foldername);
-        if (folder.isPresent()) {
-            sortedPhotos = photoRepository.findByFolder(folder.get());
-            sortedPhotos.sort(Comparator.comparing(Photo::getCreatedDate));
+                                                  String folderName) {
+        Optional<Folder> folder = folderRepository.findByName(folderName);
+        if (!folder.isPresent()) {
+            return null;
         }
+
+        List<Photo> sortedPhotos = photoRepository.findByFolder(folder.get());
+        if (sortedPhotos.isEmpty()) {
+            return null;
+        }
+
+        sortedPhotos.sort(Comparator.comparing(Photo::getCreatedDate));
+
         return sortedPhotos;
     }
 
 
     public static boolean savePhotoToFolder(FolderRepository folderRepository,
-                                         PhotoRepository photoRepository,
-                                         String foldername,
-                                         Photo photo) throws Exception {
-        Optional<Folder> folder = folderRepository.findByName(foldername);
+                                            PhotoRepository photoRepository,
+                                            String folderName,
+                                            Photo photo) throws Exception {
+        Optional<Folder> folder = folderRepository.findByName(folderName);
         if (!folder.isPresent()) {
-            throw new Exception(String.format("Folder %s doesn't exist", foldername));
+            throw new Exception(String.format("Folder %s doesn't exist", folderName));
         }
 
         if (photo == null) {
@@ -62,7 +68,7 @@ public class DatasourceHelper {
     }
 
     public static void changeDescription(PhotoRepository photoRepository,
-                                         Long identifier,
+                                         long identifier,
                                          String newDescription) throws Exception {
         Optional<Photo> photoOptional = photoRepository.findByIdentifier(identifier);
 

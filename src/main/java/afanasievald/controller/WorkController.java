@@ -39,7 +39,7 @@ public class WorkController {
 
     @GetMapping("/gallery")
     public String viewPhoto(Model model) {
-        LinkedHashMap<String, Long> folders = DatasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
+        Map<String, Long> folders = DatasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
         if (!folders.isEmpty()) {
             model.addAttribute("folders", folders.keySet());
             model.addAttribute("foldersAndPhotos", folders);
