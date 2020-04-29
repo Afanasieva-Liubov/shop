@@ -16,7 +16,7 @@ public class Folder {
     private String name;
 
     @Column
-    private Date createdDate;
+    private Date createdDate = new Date();
 
     @OneToMany(mappedBy = "folder")
     private final List<Photo> photos = new ArrayList<>();
@@ -26,12 +26,10 @@ public class Folder {
 
     public Folder(String name){
         this.name = name;
-        this.createdDate = new Date();
     }
 
     public Folder(String name, Date createdDate){
         this.name = name;
-        this.createdDate = createdDate;
     }
 
     public int getId() {

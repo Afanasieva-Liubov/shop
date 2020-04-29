@@ -6,7 +6,6 @@ import afanasievald.repository.FolderRepository;
 import afanasievald.repository.PhotoRepository;
 import afanasievald.uploadingPhoto.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -82,13 +81,22 @@ public class WorkController {
     public String uploadPhoto(@PathVariable String foldername,
                               @RequestParam("files") MultipartFile[] files) throws Exception {
         for (MultipartFile file : files) {
-            byte[] content = file.getBytes();
-            Photo photo = storageService.uploadPhotos(file.getOriginalFilename(), content);
+            Photo photo = null;
+            boolean isSaved = false;
+            try {
+                byte[] content = file.getBytes();
+                photo = storageService.uploadPhotos(file.getOriginalFilename(), content);
 
-            DatasourceHelper.savePhotoToFolder(folderRepository,
+                isSaved = DatasourceHelper.savePhotoToFolder(folderRepository,
                         photoRepository,
                         foldername,
                         photo);
+            } finally {
+                if (photo != null && isSaved == false) {
+                    storageService.deletePhoto(photo);
+                }
+
+            }
         }
         return "redirect:/gallery/folder/{foldername}";
     }

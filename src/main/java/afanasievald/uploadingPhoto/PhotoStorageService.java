@@ -48,13 +48,18 @@ public class PhotoStorageService implements StorageService {
         byte[] normalizedByteArray = ImageRotation.normalizeOrientation(byteArray);
 
         Photo photo = new Photo();
-        photo.setIdentifier(Arrays.hashCode(byteArray)+(new Date()).hashCode());
+        photo.setIdentifier(Arrays.hashCode(byteArray) + (new Date()).hashCode());
         photo.setName(String.format("%s.%s", photo.getIdentifier(), Objects.requireNonNull(fileName).split("\\.")[1]));
 
         Path newFileNameAndPath = Paths.get(photoLocation, photo.getName());
         Files.write(newFileNameAndPath, normalizedByteArray);
-
         return photo;
+    }
+
+    @Override
+    public void deletePhoto(Photo photo) throws IOException {
+        Path fileNameAndPath = Paths.get(photoLocation, photo.getName());
+        Files.delete(fileNameAndPath);
     }
 
     @Override

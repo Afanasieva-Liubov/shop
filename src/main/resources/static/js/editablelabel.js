@@ -1,27 +1,25 @@
-$('.holder').on('click', "label.editable", function() {
+$('.holder').on('click', "label.editable", function () {
     var $lbl = $(this), o = $lbl.text(),
-        $txt = $('<input type="text" class="editable" align="right" value='+o+' />');
+        $txt = $('<input type="text" class="editable" align="right" value=' + o + ' />');
     $lbl.replaceWith($txt);
     $txt.focus();
 
-    $txt.blur(function() {
+    $txt.blur(function () {
         var newdescription = $(this).val();
-        if (newdescription==null || newdescription ==""){
+        if (newdescription == null || newdescription == "") {
             $lbl.text("Введите описание");
-        }
-        else {
+        } else {
             $lbl.text(newdescription);
         }
         $txt.replaceWith($lbl);
         change_description($lbl.parent(), newdescription);
     })
-        .keydown(function(evt){
-            if(evt.keyCode === 13) {
+        .keydown(function (evt) {
+            if (evt.keyCode === 13) {
                 var newdescription = $(this).val();
-                if (newdescription==null || newdescription ==""){
+                if (newdescription == null || newdescription == "") {
                     $lbl.text("Введите описание");
-                }
-                else {
+                } else {
                     $lbl.text(newdescription);
                 }
                 $txt.replaceWith($lbl);

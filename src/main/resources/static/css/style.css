@@ -4,7 +4,7 @@
     margin: 0 auto; /* этот стиль центрирует контейнер */
 }
 
-.editable{
+.editable {
     text-align: right;
 }
 
@@ -21,6 +21,7 @@
     padding: 10px; /* добавляем отступы с каждой стороны */
     box-sizing: border-box; /* меняем способ вычисления ширины */
 }
+
 .photo img {
     display: block;
     max-width: 100%;
@@ -28,13 +29,16 @@
     border: 2px solid #eee;
     box-sizing: border-box;
 }
+
 .photo a:hover {
     opacity: 0.5;
 }
+
 .photo a {
     display: block;
     position: relative;
 }
+
 .photo a:after {
     content: '';
     background: transparent url(../image/icons/eye-icon.png) no-repeat center;
@@ -48,6 +52,7 @@
     right: 0;
     visibility: hidden;
 }
+
 .photo:hover > a:after {
     visibility: visible;
 }
@@ -57,6 +62,7 @@
     text-align: center;
     margin-top: 20px;
 }
+
 .photo input {
     color: #999999;
     text-align: center;

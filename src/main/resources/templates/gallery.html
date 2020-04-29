@@ -2,48 +2,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-	<head>
-		<title>Photo Gallery</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta charset="utf-8">
-        <link rel="stylesheet" th:href="@{/css/style.css}"/>
-        <link rel="stylesheet" th:href="@{/css/verticalmenustyle.css}"/>
-        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
-        <link rel="stylesheet" th:href="@{/lightbox/css/lightbox.min.css}"/>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300"/>
-	</head>
-    
-    <body>
-        <div class="container">
-           <h1>Фото-галерея</h1>
-            <div class="widget">
-                <h3 class="widget-title">Папки</h3>
-                <ul class="widget-list">
-                    <li th:each="foldername : ${folders}">
-                        <a th:href="@{${'/gallery/folder/' + foldername}}">
-                            <span th:text="${foldername}"/>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+<head>
+    <title>Photo Gallery</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/verticalmenustyle.css}"/>
+    <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+    <link rel="stylesheet" th:href="@{/lightbox/css/lightbox.min.css}"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300"/>
+</head>
 
-            <div id="gallery">
-                <div>
-                    <ul>
-                        <li th:each="element : ${foldersAndPhotos}">
-                            <div th:if="${element.value}">
-                            <figure class="photo">
-                                <a th:href="@{${'/gallery/showOneFoto/' + element.value}}" data-lightbox="roadtrip" th:data-title="${element.key}">
-                                    <img th:src="@{${'/gallery/showOneFoto/' + element.value}}" alt=""/>
-                                </a>
-                                <figcaption><span th:text="${element.key}"/></figcaption>
-                            </figure>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+<body>
+<div class="container">
+    <h1>Фото-галерея</h1>
+    <div class="widget">
+        <h3 class="widget-title">Папки</h3>
+        <ul class="widget-list">
+            <li th:each="foldername : ${folders}">
+                <a th:href="@{${'/gallery/folder/' + foldername}}">
+                    <span th:text="${foldername}"/>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div id="gallery">
+        <div>
+            <ul>
+                <li th:each="element : ${foldersAndPhotos}">
+                    <div th:if="${element.value}">
+                        <figure class="photo">
+                            <a th:href="@{${'/gallery/showOneFoto/' + element.value}}" data-lightbox="roadtrip"
+                               th:data-title="${element.key}">
+                                <img th:src="@{${'/gallery/showOneFoto/' + element.value}}" alt=""/>
+                            </a>
+                            <figcaption><span th:text="${element.key}"/></figcaption>
+                        </figure>
+                    </div>
+                </li>
+            </ul>
         </div>
-        <script th:src="@{/lightbox/js/lightbox-plus-jquery.min.js}"></script>
-    </body>
+    </div>
+</div>
+<script th:src="@{/lightbox/js/lightbox-plus-jquery.min.js}"></script>
+</body>
 </html>
