@@ -5,8 +5,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.*;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Objects;
 
+import afanasievald.databaseEntity.Photo;
 import afanasievald.uploadingPhoto.image.ImageRotation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -15,32 +17,29 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PhotoStorageService implements StorageService {
-
-    private final Path photoLocationPath;
     private final String photoLocation;
 
     @Autowired
     public PhotoStorageService(StorageProperties properties) throws Exception {
         this.photoLocation = properties.getPhotoLocation();
-        this.photoLocationPath = Paths.get(this.photoLocation);
+        Path photoLocationPath = Paths.get(this.photoLocation);
         try {
-            if (!Files.exists(this.photoLocationPath)) {
-                Files.createDirectories(this.photoLocationPath);
+            if (!Files.exists(photoLocationPath)) {
+                Files.createDirectories(photoLocationPath);
             } else {
-                if (!Files.isDirectory(this.photoLocationPath, LinkOption.NOFOLLOW_LINKS)) {
-                    throw new Exception(String.format("Application is closed, because photoLocationPath %s isn't directory", this.photoLocationPath.toString()));
+                if (!Files.isDirectory(photoLocationPath, LinkOption.NOFOLLOW_LINKS)) {
+                    throw new Exception(String.format("Application is closed, because photoLocationPath %s isn't directory", this.photoLocation.toString()));
                 }
             }
         } catch (IOException e) {
-            throw new Exception(String.format("Application is closed, because photoLocationPath %s isn't correct", this.photoLocationPath.toString()));
+            throw new Exception(String.format("Application is closed, because photoLocationPath %s isn't correct", this.photoLocation.toString()));
         }
     }
 
     @Override
-    public String uploadPhotos(String folderName,
-                               String fileName,
-                               byte[] byteArray) throws Exception {
-        Path fileNameAndPath = Paths.get(String.format("%s/%s", photoLocation, folderName), fileName);
+    public Photo uploadPhotos(String fileName,
+                              byte[] byteArray) throws Exception {
+        Path fileNameAndPath = Paths.get(photoLocation, fileName);
         String mimeType = Files.probeContentType(fileNameAndPath);
         if (!mimeType.startsWith("image/")) {
             throw new Exception(String.format("File %s isn't image", fileNameAndPath));
@@ -48,29 +47,27 @@ public class PhotoStorageService implements StorageService {
 
         byte[] normalizedByteArray = ImageRotation.normalizeOrientation(byteArray);
 
-        String newFileName = String.format("%s.%s", Arrays.hashCode(byteArray), Objects.requireNonNull(fileName).split("\\.")[1]);
-        Path newFileNameAndPath = Paths.get(String.format("%s/%s", photoLocation, folderName), newFileName);
+        Photo photo = new Photo();
+        photo.setIdentifier(Arrays.hashCode(byteArray)+(new Date()).hashCode());
+        photo.setName(String.format("%s.%s", photo.getIdentifier(), Objects.requireNonNull(fileName).split("\\.")[1]));
+
+        Path newFileNameAndPath = Paths.get(photoLocation, photo.getName());
         Files.write(newFileNameAndPath, normalizedByteArray);
-        return newFileName;
+
+        return photo;
     }
 
     @Override
-    public byte[] loadPhotoAsResource(String folderName,
-                                      String fileName) throws MalformedURLException {
-        if (folderName == null || folderName.isEmpty()) {
-            return null;
-        }
-
+    public byte[] loadPhotoAsResource(String fileName) throws MalformedURLException {
         if (fileName == null || fileName.isEmpty()) {
             return null;
         }
 
         try {
-            String filename = String.format("%s/%s", folderName, fileName);
-            Path file = photoLocationPath.resolve(filename);
+            Path file = Paths.get(photoLocation, fileName);
             Resource resource = new UrlResource(file.toUri());
             if (!resource.exists() && !resource.isReadable()) {
-                throw new StorageFileNotFoundException(String.format("Could not read file: %s", filename));
+                throw new StorageFileNotFoundException(String.format("Could not read file: %s", fileName));
             }
 
             InputStream initialStream = resource.getInputStream();

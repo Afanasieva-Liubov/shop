@@ -9,11 +9,10 @@ public class DatasourceHelper {
     public DatasourceHelper(){
     }
 
-
-    public static LinkedHashMap<String, Integer> getFoldersWithPhotoIdentifier(FolderRepository folderRepository,
+    public static LinkedHashMap<String, Long> getFoldersWithPhotoIdentifier(FolderRepository folderRepository,
                                                                                PhotoRepository photoRepository){
         Iterable<Folder> folders = folderRepository.findByOrderByCreatedDateAsc();
-        LinkedHashMap<String, Integer> foldersWithOnePhoto = new LinkedHashMap<>();
+        LinkedHashMap<String, Long> foldersWithOnePhoto = new LinkedHashMap<>();
         for(Folder folder: folders){
              List<Photo> photos = photoRepository.findByFolder(folder);
             if (!photos.isEmpty()){
@@ -42,25 +41,28 @@ public class DatasourceHelper {
 
     public static void savePhotoToFolder(FolderRepository folderRepository,
                                   PhotoRepository photoRepository,
-                                  int identifier,
                                   String foldername,
-                                  String filename) throws Exception{
+                                  Photo photo) throws Exception{
         Optional<Folder> folder = folderRepository.findByName(foldername);
         if (!folder.isPresent()) {
             throw new Exception(String.format("Folder %s doesn't exist", foldername));
         }
 
-        Optional<Photo> optPhoto = photoRepository.findByIdentifier(identifier);
-        if (optPhoto.isPresent()){
-            throw new Exception(String.format("Photo with identifier %d exists", identifier));
+        if (photo == null){
+            throw new Exception("Photo is null");
         }
 
-        Photo photo = new Photo(identifier, folder.get(), filename, null);
+        Optional<Photo> optPhoto = photoRepository.findByIdentifier(photo.getIdentifier());
+        if (optPhoto.isPresent()){
+            throw new Exception(String.format("Photo with identifier %d exists", photo.getIdentifier()));
+        }
+
+        photo.setFolder(folder.get());
         photoRepository.save(photo);
     }
 
     public static void changeDescription(PhotoRepository photoRepository,
-                                    int identifier,
+                                    Long identifier,
                                     String newDescription) throws Exception{
         Optional<Photo> photoOptional= photoRepository.findByIdentifier(identifier);
 

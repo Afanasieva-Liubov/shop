@@ -1,10 +1,10 @@
 package afanasievald.uploadingPhoto;
 
-public interface StorageService {
-    String uploadPhotos(String folderName,
-                        String fileName,
-                        byte[] byteArray) throws Exception;
+import afanasievald.databaseEntity.Photo;
 
-    byte[] loadPhotoAsResource(String folderName,
-                               String fileName) throws Exception;
+public interface StorageService {
+    Photo uploadPhotos(String fileName,
+                       byte[] byteArray) throws Exception;
+
+    byte[] loadPhotoAsResource(String fileName) throws Exception;
 }

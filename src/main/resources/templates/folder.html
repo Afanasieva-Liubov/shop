@@ -30,8 +30,8 @@
             <ul>
                 <li th:each="photo : ${photos}">
                     <figure  class="photo">
-                        <a th:href="@{${'/gallery/folder/' + foldername + '/' + photo.identifier}}" data-lightbox="roadtrip" th:data-title="${photo.description}">
-                            <img th:src="@{${'/gallery/folder/' + foldername + '/' + photo.identifier}}" alt=""/>
+                        <a th:href="@{${'/gallery/showOneFoto/' + photo.identifier}}" data-lightbox="roadtrip" th:data-title="${photo.description}">
+                            <img th:src="@{${'/gallery/showOneFoto/' + photo.identifier}}" alt=""/>
                         </a>
                         <div th:id="${photo.identifier}" class="holder">
                             <label class="editable">

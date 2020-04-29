@@ -162,7 +162,7 @@ class WorkControllerTest {
     @Test
     void changeDescription_ExistingPhoto() throws Exception {
         Photo photo = new Photo(1, null,"photo", null);
-        when(photoRepository.findByIdentifier(1)).thenReturn(Optional.of(photo));
+        when(photoRepository.findByIdentifier(1l)).thenReturn(Optional.of(photo));
         when(photoRepository.save(photo)).thenReturn(photo);
         mockMvc
                 .perform(post("/photo/changedescription")

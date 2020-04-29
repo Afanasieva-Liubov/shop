@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface PhotoRepository extends CrudRepository<Photo, Integer> {
     List<Photo> findByFolder(Folder folder);
-    Optional<Photo> findByIdentifier(int identifier);
+    Optional<Photo> findByIdentifier(Long identifier);
 }

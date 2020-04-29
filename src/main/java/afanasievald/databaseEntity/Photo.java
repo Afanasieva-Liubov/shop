@@ -7,7 +7,7 @@ import java.util.Date;
 public class Photo {
     @Id
     @Column(unique = true, nullable = false)
-    private int identifier;
+    private long identifier;
 
     @ManyToOne
     private Folder folder;
@@ -19,20 +19,19 @@ public class Photo {
     private String description;
 
     @Column
-    private Date createdDate;
+    private Date createdDate =  new Date();
 
     public Photo() {
     }
 
-    public Photo(int identifier, Folder folder, String name, String description){
+    public Photo(long identifier, Folder folder, String name, String description){
         this.identifier = identifier;
         this.folder = folder;
         this.name = name;
         this.description = description;
-        this.createdDate = new Date();
     }
 
-    public Photo(int identifier, Folder folder, String name, String description, Date createdDate){
+    public Photo(long identifier, Folder folder, String name, String description, Date createdDate){
         this.identifier = identifier;
         this.folder = folder;
         this.name = name;
@@ -40,11 +39,11 @@ public class Photo {
         this.createdDate = createdDate;
     }
 
-    public int getIdentifier() {
+    public long getIdentifier() {
         return identifier;
     }
 
-    public void setIdentifier(int identifier) {
+    public void setIdentifier(long identifier) {
         this.identifier = identifier;
     }
 
@@ -52,7 +51,7 @@ public class Photo {
         return folder;
     }
 
-    public void setIdFolder(Folder folder) {
+    public void setFolder(Folder folder) {
         this.folder = folder;
     }
 

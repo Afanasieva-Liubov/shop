@@ -10,7 +10,7 @@ public class Folder {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(unique = true, nullable = false)
-    private Integer id;
+    private int id;
 
     @Column(unique = true)
     private String name;
@@ -34,7 +34,7 @@ public class Folder {
         this.createdDate = createdDate;
     }
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 

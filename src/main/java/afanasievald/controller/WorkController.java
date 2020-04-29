@@ -40,7 +40,7 @@ public class WorkController {
 
     @GetMapping("/gallery")
     public String viewPhoto(Model model) {
-        LinkedHashMap<String, Integer> folders = DatasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
+        LinkedHashMap<String, Long> folders = DatasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
         if (!folders.isEmpty()) {
             model.addAttribute("folders", folders.keySet());
             model.addAttribute("foldersAndPhotos", folders);
@@ -48,15 +48,14 @@ public class WorkController {
         return "gallery";
     }
 
-    @GetMapping("/gallery/folder/{foldername}/{identifier}")
-    public ResponseEntity<byte[]> showOneFoto(@PathVariable String foldername,
-                                              @PathVariable int identifier) throws Exception {
+    @GetMapping("/gallery/showOneFoto/{identifier}")
+    public ResponseEntity<byte[]> showOneFoto(@PathVariable Long identifier) throws Exception {
         Optional<Photo> photo = photoRepository.findByIdentifier(identifier);
         if (!photo.isPresent()) {
             return null;
         }
 
-        byte[] byteArray = storageService.loadPhotoAsResource(foldername, photo.get().getName());
+        byte[] byteArray = storageService.loadPhotoAsResource(photo.get().getName());
         if (byteArray == null) {
             return null;
         }
@@ -84,14 +83,12 @@ public class WorkController {
                               @RequestParam("files") MultipartFile[] files) throws Exception {
         for (MultipartFile file : files) {
             byte[] content = file.getBytes();
-            String newFileName = storageService.uploadPhotos(foldername, file.getOriginalFilename(), content);
-            if (newFileName != null) {
-                DatasourceHelper.savePhotoToFolder(folderRepository,
+            Photo photo = storageService.uploadPhotos(file.getOriginalFilename(), content);
+
+            DatasourceHelper.savePhotoToFolder(folderRepository,
                         photoRepository,
-                        Arrays.hashCode(content),
                         foldername,
-                        newFileName);
-            }
+                        photo);
         }
         return "redirect:/gallery/folder/{foldername}";
     }

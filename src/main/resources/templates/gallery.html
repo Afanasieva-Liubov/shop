@@ -33,8 +33,8 @@
                         <li th:each="element : ${foldersAndPhotos}">
                             <div th:if="${element.value}">
                             <figure class="photo">
-                                <a th:href="@{${'/gallery/folder/' + element.key + '/' + element.value}}" data-lightbox="roadtrip" th:data-title="${element.key}">
-                                    <img th:src="@{${'/gallery/folder/' + element.key + '/' + element.value}}" alt=""/>
+                                <a th:href="@{${'/gallery/showOneFoto/' + element.value}}" data-lightbox="roadtrip" th:data-title="${element.key}">
+                                    <img th:src="@{${'/gallery/showOneFoto/' + element.value}}" alt=""/>
                                 </a>
                                 <figcaption><span th:text="${element.key}"/></figcaption>
                             </figure>
