@@ -1,5 +1,7 @@
 package afanasievald.databaseEntity;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -19,19 +21,20 @@ public class Photo {
     private String description;
 
     @Column
+    @NotNull
     private Date createdDate =  new Date();
 
     public Photo() {
     }
 
-    public Photo(long identifier, Folder folder, String name, String description){
+    public Photo(long identifier, @NotNull Folder folder, @NotNull String name, @NotNull String description){
         this.identifier = identifier;
         this.folder = folder;
         this.name = name;
         this.description = description;
     }
 
-    public Photo(long identifier, Folder folder, String name, String description, Date createdDate){
+    public Photo(long identifier, @NotNull Folder folder, @NotNull String name, @NotNull String description, @NotNull Date createdDate){
         this.identifier = identifier;
         this.folder = folder;
         this.name = name;
@@ -51,7 +54,7 @@ public class Photo {
         return folder;
     }
 
-    public void setFolder(Folder folder) {
+    public void setFolder(@NotNull Folder folder) {
         this.folder = folder;
     }
 
@@ -59,7 +62,7 @@ public class Photo {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(@NotNull String name) {
         this.name = name;
     }
 
@@ -67,7 +70,7 @@ public class Photo {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(@NotNull String description) {
         this.description = description;
     }
 
@@ -75,7 +78,7 @@ public class Photo {
         return createdDate;
     }
 
-    public void setCreatedDate(Date createdDate) {
+    public void setCreatedDate(@NotNull Date createdDate) {
         this.createdDate = createdDate;
     }
 }

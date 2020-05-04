@@ -10,34 +10,40 @@ import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import javaxt.io.Image;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 public class ImageRotation {
+    @NotNull
+    private static final Logger logger = LogManager.getLogger(ImageRotation.class.getName());
 
-    private static ImageInformation readImageInformation(byte[] byteArray) throws IOException, MetadataException, ImageProcessingException {
-        Metadata metadata = ImageMetadataReader.readMetadata(new ByteArrayInputStream(byteArray));
-        Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-        JpegDirectory jpegDirectory = metadata.getFirstDirectoryOfType(JpegDirectory.class);
+    private static ImageInformation readImageInformation(@NotNull byte[] byteArray) {
+        try {
+            Metadata metadata = ImageMetadataReader.readMetadata(new ByteArrayInputStream(byteArray));
+            Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+            JpegDirectory jpegDirectory = metadata.getFirstDirectoryOfType(JpegDirectory.class);
 
-        if (directory != null) {
-            int orientation;
-            try {
-                orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-            } catch (MetadataException me) {
-                throw new MetadataException("Could not get orientation");
+            if (directory == null) {
+                String exceptionString = "Directory is null";
+                logger.warn(exceptionString);
+                return null;
             }
+
+            int orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
             int width = jpegDirectory.getImageWidth();
             int height = jpegDirectory.getImageHeight();
 
             return new ImageInformation(orientation, width, height);
-        } else {
+        } catch (MetadataException | ImageProcessingException | IOException e) {
+            logger.error(e.getMessage());
             return null;
         }
     }
 
-    public static byte[] normalizeOrientation(byte[] byteArray) throws IOException, MetadataException, ImageProcessingException {
+    public static byte[] normalizeOrientation(@NotNull byte[] byteArray) {
         Image image = new Image(byteArray);
         ImageInformation imageInformation = readImageInformation(byteArray);
         if (imageInformation != null) {
@@ -47,7 +53,7 @@ public class ImageRotation {
         return image.getByteArray();
     }
 
-    private static void rotate(ImageInformation info, Image image) {
+    private static void rotate(@NotNull ImageInformation info, @NotNull Image image) {
         switch (info.orientation) {
             case 1:
                 return;

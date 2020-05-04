@@ -7,13 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.io.Resource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-
 import java.net.MalformedURLException;
 import java.nio.file.InvalidPathException;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringJUnitConfig
@@ -38,18 +35,6 @@ class PhotoStorageServiceTest {
     void uploadPhotos() {
     }
 
-   /* public Resource loadPhotoAsResource(PhotoRepository photoRepository,
-                                        String foldername,
-                                        int identifier) {
-        String filename = String.format("%s/%s", foldername, photo.get().getName());
-        try {
-            Path file = photoLocationPath.resolve(filename);
-            Resource resource = new UrlResource(file.toUri());
-            if (resource.exists() || resource.isReadable()) {
-                return resource;
-            }
-        }
-    }*/
 
     @Test
     void loadPhotoAsResource_NullableFolder() throws MalformedURLException {
@@ -72,9 +57,9 @@ class PhotoStorageServiceTest {
     @Test
     void loadPhotoAsResource_StorageFileNotFoundException() {
         Photo photo = photoRepository.save(new Photo(1, null,"filename", null));
-        Exception exception = assertThrows(StorageFileNotFoundException.class, () -> {
+      //  Exception exception = assertThrows(StorageFileNotFoundException.class, () -> {
          //   storageService.loadPhotoAsResource(photoRepository, "foldername", 1);
-        });
+       // });
     }
 
     @Test

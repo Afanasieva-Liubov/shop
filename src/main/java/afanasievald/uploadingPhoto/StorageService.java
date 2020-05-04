@@ -1,14 +1,13 @@
 package afanasievald.uploadingPhoto;
 
 import afanasievald.databaseEntity.Photo;
-
-import java.io.IOException;
+import afanasievald.repository.PhotoRepository;
+import org.jetbrains.annotations.NotNull;
 
 public interface StorageService {
-    Photo uploadPhotos(String fileName,
-                       byte[] byteArray) throws Exception;
+    Photo uploadPhotos(@NotNull String fileName, @NotNull byte[] byteArray);
 
-    void deletePhoto(Photo photo) throws IOException;
+    boolean deletePhoto(@NotNull Photo photo);
 
-    byte[] loadPhotoAsResource(String fileName) throws Exception;
+    byte[] loadPhotoAsResource(@NotNull PhotoRepository photoRepository, long identifier);
 }

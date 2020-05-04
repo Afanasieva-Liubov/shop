@@ -32,6 +32,7 @@ function change_description(parentNode, newdescription) {
     var photo = {}
     photo["identifier"] = parentNode.attr('id');
     photo["description"] = newdescription;
+    var errorNode = parentNode[0].querySelector('.operationStatusClass');
 
     $.ajax({
         type: "POST",
@@ -42,15 +43,12 @@ function change_description(parentNode, newdescription) {
         cache: false,
         timeout: 600000,
         success: function (data) {
-            var json = "<h4>Ajax Response</h4>&lt;pre&gt;"
-                + JSON.stringify(data, null, 4) + "&lt;/pre&gt;";
             console.log("SUCCESS : ", data);
+            errorNode.innerHTML = "Description is changed!";
         },
         error: function (e) {
-
-            var json = "<h4>Ajax Response</h4>&lt;pre&gt;"
-                + e.responseText + "&lt;/pre&gt;";
             console.log("ERROR : ", e);
+            errorNode.innerHTML = "Error in changing description!";
         }
     });
 }

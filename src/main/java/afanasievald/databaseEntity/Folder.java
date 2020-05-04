@@ -1,5 +1,7 @@
 package afanasievald.databaseEntity;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,6 +18,7 @@ public class Folder {
     private String name;
 
     @Column
+    @NotNull
     private Date createdDate = new Date();
 
     @OneToMany(mappedBy = "folder")
@@ -24,11 +27,11 @@ public class Folder {
     public Folder() {
     }
 
-    public Folder(String name){
+    public Folder(@NotNull String name){
         this.name = name;
     }
 
-    public Folder(String name, Date createdDate){
+    public Folder(@NotNull String name, @NotNull Date createdDate){
         this.name = name;
         this.createdDate = createdDate;
     }
@@ -45,7 +48,7 @@ public class Folder {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(@NotNull String name) {
         this.name = name;
     }
 
@@ -53,7 +56,7 @@ public class Folder {
         return createdDate;
     }
 
-    public void setCreatedDate(Date createdDate) {
+    public void setCreatedDate(@NotNull Date createdDate) {
         this.createdDate = createdDate;
     }
 }

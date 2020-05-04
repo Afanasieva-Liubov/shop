@@ -2,15 +2,21 @@ package afanasievald.repository;
 
 import afanasievald.databaseEntity.Folder;
 import afanasievald.databaseEntity.Photo;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class DatasourceHelper {
-    public DatasourceHelper() {
+    @NotNull
+    private static final Logger logger = LogManager.getLogger(DatasourceHelper.class.getName());
+
+    private DatasourceHelper() {
     }
 
-    public static Map<String, Long> getFoldersWithPhotoIdentifier(FolderRepository folderRepository,
-                                                                            PhotoRepository photoRepository) {
+    public static Map<String, Long> getFoldersWithPhotoIdentifier(@NotNull FolderRepository folderRepository,
+                                                                  @NotNull PhotoRepository photoRepository) {
         Iterable<Folder> folders = folderRepository.findByOrderByCreatedDateAsc();
         Map<String, Long> foldersWithOnePhoto = new LinkedHashMap<>();
         for (Folder folder : folders) {
@@ -25,17 +31,19 @@ public class DatasourceHelper {
         return foldersWithOnePhoto;
     }
 
-    public static List<Photo> getPhotosFromFolder(FolderRepository folderRepository,
-                                                  PhotoRepository photoRepository,
-                                                  String folderName) {
+    public static List<Photo> getPhotosFromFolder(@NotNull FolderRepository folderRepository,
+                                                  @NotNull PhotoRepository photoRepository,
+                                                  @NotNull String folderName) {
         Optional<Folder> folder = folderRepository.findByName(folderName);
         if (!folder.isPresent()) {
+            String exceptionString = String.format("Folder %s doesn't exist in DB", folderName);
+            logger.error(exceptionString);
             return null;
         }
 
         List<Photo> sortedPhotos = photoRepository.findByFolder(folder.get());
         if (sortedPhotos.isEmpty()) {
-            return null;
+            return sortedPhotos;
         }
 
         sortedPhotos.sort(Comparator.comparing(Photo::getCreatedDate));
@@ -44,22 +52,22 @@ public class DatasourceHelper {
     }
 
 
-    public static boolean savePhotoToFolder(FolderRepository folderRepository,
-                                            PhotoRepository photoRepository,
-                                            String folderName,
-                                            Photo photo) throws Exception {
+    public static boolean savePhotoToFolder(@NotNull FolderRepository folderRepository,
+                                            @NotNull PhotoRepository photoRepository,
+                                            @NotNull String folderName,
+                                            @NotNull Photo photo) {
         Optional<Folder> folder = folderRepository.findByName(folderName);
         if (!folder.isPresent()) {
-            throw new Exception(String.format("Folder %s doesn't exist", folderName));
-        }
-
-        if (photo == null) {
-            throw new Exception("Photo is null");
+            String exceptionString = String.format("Folder %s doesn't exist", folderName);
+            logger.error(exceptionString);
+            return false;
         }
 
         Optional<Photo> optPhoto = photoRepository.findByIdentifier(photo.getIdentifier());
         if (optPhoto.isPresent()) {
-            throw new Exception(String.format("Photo with identifier %d exists", photo.getIdentifier()));
+            String exceptionString = String.format("Photo with identifier %d exists", photo.getIdentifier());
+            logger.error(exceptionString);
+            return false;
         }
 
         photo.setFolder(folder.get());
@@ -67,17 +75,18 @@ public class DatasourceHelper {
         return true;
     }
 
-    public static void changeDescription(PhotoRepository photoRepository,
-                                         long identifier,
-                                         String newDescription) throws Exception {
-        Optional<Photo> photoOptional = photoRepository.findByIdentifier(identifier);
-
+    public static boolean changeDescription(@NotNull PhotoRepository photoRepository,
+                                            @NotNull Photo photo) {
+        Optional<Photo> photoOptional = photoRepository.findByIdentifier(photo.getIdentifier());
         if (!photoOptional.isPresent()) {
-            throw new Exception(String.format("Photo with identifier %d doesn't exist", identifier));
+            String exceptionString = String.format("Photo with identifier %d doesn't exist", photo.getIdentifier());
+            logger.error(exceptionString);
+            return false;
         }
 
-        Photo photo = photoOptional.get();
-        photo.setDescription(newDescription);
-        photoRepository.save(photo);
+        Photo realPhoto = photoOptional.get();
+        realPhoto.setDescription(photo.getDescription());
+        photoRepository.save(realPhoto);
+        return true;
     }
 }
