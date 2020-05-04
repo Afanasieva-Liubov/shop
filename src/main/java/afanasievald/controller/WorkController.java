@@ -19,8 +19,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.io.IOException;
+
 import java.util.*;
 
 @Controller
@@ -60,10 +60,10 @@ public class WorkController {
     }
 
     @GetMapping("/gallery/showOnePhoto/{identifier}")
-    public ResponseEntity<byte[]> showOnePhoto(@PathVariable long identifier) {
+    public ResponseEntity<?> showOnePhoto(@PathVariable long identifier) {
         byte[] byteArray = storageService.loadPhotoAsResource(photoRepository, identifier);
         if (byteArray == null) {
-            return null;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error loading photo");
         }
 
         return ResponseEntity
@@ -95,7 +95,6 @@ public class WorkController {
     public String uploadPhoto(@PathVariable String foldername,
                               @RequestParam("files") MultipartFile[] files,
                               RedirectAttributes redirectAttributes) {
-        StringBuilder exceptionStringBuilder = new StringBuilder();
         boolean isOk = true;
         for (MultipartFile file : files) {
             Photo photo = null;
@@ -106,7 +105,6 @@ public class WorkController {
                 if (file == null || file.getOriginalFilename() == null) {
                     isOk = false;
                     String exceptionString = "Photo is nullable, photo isn't downloaded";
-                    exceptionStringBuilder.append(exceptionString).append(System.lineSeparator());
                     logger.error(exceptionString);
                     continue;
                 }
@@ -115,7 +113,6 @@ public class WorkController {
                 if (photo == null) {
                     isOk = false;
                     String exceptionString = String.format("Photo %s isn't downloaded", file.getOriginalFilename());
-                    exceptionStringBuilder.append(exceptionString).append(System.lineSeparator());
                     logger.error(exceptionString);
                     continue;
                 }
@@ -128,7 +125,6 @@ public class WorkController {
                     isOk = false;
                     String exceptionString = String.format("Photo %s with identifier %d isn't saved in DB",
                             file.getOriginalFilename(), photo.getIdentifier());
-                    exceptionStringBuilder.append(exceptionString).append(System.lineSeparator());
                     logger.error(exceptionString);
                 }
             } catch (IOException e) {
@@ -136,7 +132,6 @@ public class WorkController {
                 logger.error(e.getMessage());
                 String exceptionString = String.format("Photo %s isn't uploaded to disk", file.getOriginalFilename());
                 logger.error(exceptionString);
-                exceptionStringBuilder.append(exceptionString).append(System.lineSeparator());
             } finally {
                 if (photo != null && !isSaved) {
                     boolean isDeleted = storageService.deletePhoto(photo);
@@ -145,12 +140,10 @@ public class WorkController {
                         String exceptionString = String.format("Photo %s with identifier %d is deleted from disk",
                                 file.getOriginalFilename(), photo.getIdentifier());
                         logger.info(exceptionString);
-                        exceptionStringBuilder.append(exceptionString).append(System.lineSeparator());
                     } else{
                         isOk = false;
                         String exceptionString = String.format("Photo %s with identifier %d isn't deleted from disk",
                                 file.getOriginalFilename(), photo.getIdentifier());
-                        exceptionStringBuilder.append(exceptionString).append(System.lineSeparator());
                         logger.error(exceptionString);
                     }
                 }
@@ -160,23 +153,23 @@ public class WorkController {
         if (isOk) {
             redirectAttributes.addFlashAttribute("operationStatus", "Download was correct");
         } else {
-            redirectAttributes.addFlashAttribute("operationStatus", exceptionStringBuilder.toString());
+            redirectAttributes.addFlashAttribute("operationStatus", "Download wasn't correct");
         }
         return "redirect:/gallery/folder/{foldername}";
     }
 
 
     @PostMapping("/photo/changedescription")
-    public ResponseEntity changeDescription(@NotNull @RequestBody Photo photo) {
+    public ResponseEntity<?> changeDescription(@RequestBody Photo photo) {
         boolean isChanged = DatasourceHelper.changeDescription(photoRepository, photo);
         if (isChanged) {
-            return new ResponseEntity<>("", HttpStatus.OK);
+            return ResponseEntity.ok("success");
         } else {
             String exceptionString = String.format("Error in changing description to %s in photo with identifier %d",
                     photo.getDescription(),
                     photo.getIdentifier());
             logger.error(exceptionString);
-            return new ResponseEntity<>("", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("error");
         }
     }
 }

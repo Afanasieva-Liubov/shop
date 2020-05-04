@@ -35,7 +35,8 @@
                         <figure class="photo">
                             <a th:href="@{${'/gallery/showOnePhoto/' + element.value}}" data-lightbox="roadtrip"
                                th:data-title="${element.key}">
-                                <img th:src="@{${'/gallery/showOnePhoto/' + element.value}}" alt=""/>
+                                <img th:src="@{${'/gallery/showOnePhoto/' + element.value}}" alt=""/
+                                onerror="this.onerror=null;this.src='/image/noPhoto.png';">
                             </a>
                             <figcaption><span th:text="${element.key}"/></figcaption>
                         </figure>

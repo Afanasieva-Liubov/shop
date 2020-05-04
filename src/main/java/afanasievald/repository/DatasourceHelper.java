@@ -85,7 +85,7 @@ public class DatasourceHelper {
         }
 
         Photo realPhoto = photoOptional.get();
-        realPhoto.setDescription(photo.getDescription());
+         realPhoto.setDescription(photo.getDescription());
         photoRepository.save(realPhoto);
         return true;
     }
