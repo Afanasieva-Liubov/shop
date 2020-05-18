@@ -4,19 +4,25 @@ import afanasievald.databaseEntity.Folder;
 import afanasievald.databaseEntity.Photo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.JDBCException;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.*;
 
 public class DatasourceHelper {
     @NotNull
-    private static final Logger logger = LogManager.getLogger(DatasourceHelper.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger(DatasourceHelper.class.getName());
 
     private DatasourceHelper() {
     }
 
-    public static Map<String, Long> getFoldersWithPhotoIdentifier(@NotNull FolderRepository folderRepository,
-                                                                  @NotNull PhotoRepository photoRepository) {
+    /**
+     * @param folderRepository
+     * @param photoRepository
+     * @return Map<String, Long>, where String is Name of Folder, Long is Identifier of Photo with min CreatedDate in this Folder.
+     * Map is sorted by CreatedDate of Folder.
+     */
+    public static Map<String, Long> getFoldersWithPhoto(@NotNull FolderRepository folderRepository,
+                                                        @NotNull PhotoRepository photoRepository) {
         Iterable<Folder> folders = folderRepository.findByOrderByCreatedDateAsc();
         Map<String, Long> foldersWithOnePhoto = new LinkedHashMap<>();
         for (Folder folder : folders) {
@@ -31,13 +37,18 @@ public class DatasourceHelper {
         return foldersWithOnePhoto;
     }
 
+    /**
+     * @param folderRepository
+     * @param photoRepository
+     * @param folderName
+     * @return photos sorted by CreatedDate
+     */
     public static List<Photo> getPhotosFromFolder(@NotNull FolderRepository folderRepository,
                                                   @NotNull PhotoRepository photoRepository,
                                                   @NotNull String folderName) {
         Optional<Folder> folder = folderRepository.findByName(folderName);
         if (!folder.isPresent()) {
-            String exceptionString = String.format("Folder %s doesn't exist in DB", folderName);
-            logger.error(exceptionString);
+            LOGGER.info(String.format("Folder %s doesn't exist in DB", folderName));
             return null;
         }
 
@@ -58,35 +69,42 @@ public class DatasourceHelper {
                                             @NotNull Photo photo) {
         Optional<Folder> folder = folderRepository.findByName(folderName);
         if (!folder.isPresent()) {
-            String exceptionString = String.format("Folder %s doesn't exist", folderName);
-            logger.error(exceptionString);
+            LOGGER.info(String.format("Folder %s doesn't exist", folderName));
             return false;
         }
 
         Optional<Photo> optPhoto = photoRepository.findByIdentifier(photo.getIdentifier());
         if (optPhoto.isPresent()) {
-            String exceptionString = String.format("Photo with identifier %d exists", photo.getIdentifier());
-            logger.error(exceptionString);
+            LOGGER.info(String.format("Photo with identifier %d exists", photo.getIdentifier()));
             return false;
         }
 
         photo.setFolder(folder.get());
-        photoRepository.save(photo);
-        return true;
+        try {
+            photoRepository.save(photo);
+            return true;
+        } catch(JDBCException e){
+            LOGGER.error(e.getMessage(), e);
+            return false;
+        }
     }
 
     public static boolean changeDescription(@NotNull PhotoRepository photoRepository,
                                             @NotNull Photo photo) {
         Optional<Photo> photoOptional = photoRepository.findByIdentifier(photo.getIdentifier());
         if (!photoOptional.isPresent()) {
-            String exceptionString = String.format("Photo with identifier %d doesn't exist", photo.getIdentifier());
-            logger.error(exceptionString);
+            LOGGER.info(String.format("Photo with identifier %d doesn't exist", photo.getIdentifier()));
             return false;
         }
 
         Photo realPhoto = photoOptional.get();
-         realPhoto.setDescription(photo.getDescription());
-        photoRepository.save(realPhoto);
-        return true;
+        realPhoto.setDescription(photo.getDescription());
+        try {
+            photoRepository.save(realPhoto);
+            return true;
+        } catch(JDBCException e){
+            LOGGER.error(e.getMessage(), e);
+            return false;
+        }
     }
 }

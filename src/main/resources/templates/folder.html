@@ -3,7 +3,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Photo Gallery — Practice</title>
+    <title>Folder</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
@@ -17,11 +17,11 @@
 
 <div class="container">
 
-    <h1><span th:text="${foldername}"/></h1>
+    <h1><span th:text="${foldername}"> </span></h1>
 
     <div id="gallery">
         <div th:if="${operationStatus}">
-            <label class="operationStatusClass" th:text="${operationStatus}"/>
+            <label class="operationStatusClass" th:text="${operationStatus}"></label>
         </div>
         <div th:if="${isUploadable}" class="uploaded">
             <form th:action="@{${'/gallery/folder/upload/' + foldername}}" method="post" enctype="multipart/form-data">
@@ -36,7 +36,7 @@
                         <a th:href="@{${'/gallery/showOnePhoto/' + photo.identifier}}" data-lightbox="roadtrip"
                            th:data-title="${photo.description}">
                             <img class="backup_photo" th:src="@{${'/gallery/showOnePhoto/' + photo.identifier}}" alt=""
-                                 onerror="this.onerror=null;this.src='/image/noPhoto.png';"/>
+                                 onerror="myFunction(this)"/>
                         </a>
                         <div th:id="${photo.identifier}" class="holder">
                             <label class="editable">
@@ -52,6 +52,14 @@
     </div>
 
 </div>
+
+<script>
+    function myFunction(_this) {
+        _this.onerror=null;
+        _this.src='/image/noPhoto.png';
+        _this.parentElement.nextElementSibling.hidden=true;
+    }
+</script>
 
 <script th:src="@{/lightbox/js/lightbox-plus-jquery.min.js}"></script>
 <script th:src="@{/static/jquery/js/jquery-3.5.0.min.js}"></script>

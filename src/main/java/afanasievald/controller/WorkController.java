@@ -18,15 +18,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.io.IOException;
 
+import java.io.IOException;
 import java.util.*;
 
 @Controller
 public class WorkController {
     @NotNull
-    private final Logger logger = LogManager.getLogger(PhotoStorageService.class.getName());
+    private final Logger LOGGER = LogManager.getLogger(PhotoStorageService.class.getName());
 
     @NotNull
     private final StorageService storageService;
@@ -48,7 +49,7 @@ public class WorkController {
 
     @GetMapping("/gallery")
     public String viewPhoto(Model model) {
-        Map<String, Long> folders = DatasourceHelper.getFoldersWithPhotoIdentifier(folderRepository, photoRepository);
+        Map<String, Long> folders = DatasourceHelper.getFoldersWithPhoto(folderRepository, photoRepository);
         if (!folders.isEmpty()) {
             model.addAttribute("folders", folders.keySet());
             model.addAttribute("foldersAndPhotos", folders);
@@ -78,12 +79,9 @@ public class WorkController {
                                     Model model) {
         List<Photo> photos = DatasourceHelper.getPhotosFromFolder(folderRepository, photoRepository, foldername);
         if (photos == null) {
-            String exceptionString = String.format("Folder with name %s doesn't exist", foldername);
-            logger.error(exceptionString);
-            model.addAttribute("operationStatus", exceptionString);
+            model.addAttribute("operationStatus", String.format("Folder with name %s doesn't exist", foldername));
             model.addAttribute("isUploadable", false);
             return "folder";
-
         }
 
         model.addAttribute("photos", photos);
@@ -91,62 +89,28 @@ public class WorkController {
         return "folder";
     }
 
-    @PostMapping("/gallery/folder/upload/{foldername}")
-    public String uploadPhoto(@PathVariable String foldername,
-                              @RequestParam("files") MultipartFile[] files,
+    @PostMapping("/gallery/folder/upload/{folderName}")
+    public String uploadPhoto(@PathVariable String folderName,
+                              @RequestParam(value = "files") List<MultipartFile> files,
                               RedirectAttributes redirectAttributes) {
         boolean isOk = true;
         for (MultipartFile file : files) {
-            Photo photo = null;
-            boolean isSaved = false;
-            try {//меня тут смущает, что я ловлю ексепшин,
-                // в других методах у меня ексепшины обрабатываются
-                // внутри вызываемых методов, не в контролере
-                if (file == null || file.getOriginalFilename() == null) {
+            try {
+                if (file == null || file.getOriginalFilename() == null || file.getOriginalFilename() == "" || file.getBytes() == null) {
+                    LOGGER.info("Photo is nullable, photo isn't downloaded");
                     isOk = false;
-                    String exceptionString = "Photo is nullable, photo isn't downloaded";
-                    logger.error(exceptionString);
                     continue;
                 }
 
-                photo = storageService.uploadPhotos(file.getOriginalFilename(), file.getBytes());
-                if (photo == null) {
-                    isOk = false;
-                    String exceptionString = String.format("Photo %s isn't downloaded", file.getOriginalFilename());
-                    logger.error(exceptionString);
-                    continue;
-                }
-
-                isSaved = DatasourceHelper.savePhotoToFolder(folderRepository,
+                isOk = isOk && WorkControllerHelper.uploadOnePhoto(storageService,
+                        folderRepository,
                         photoRepository,
-                        foldername,
-                        photo);
-                if (!isSaved) {
-                    isOk = false;
-                    String exceptionString = String.format("Photo %s with identifier %d isn't saved in DB",
-                            file.getOriginalFilename(), photo.getIdentifier());
-                    logger.error(exceptionString);
-                }
+                        folderName,
+                        file.getOriginalFilename(),
+                        file.getBytes());
             } catch (IOException e) {
                 isOk = false;
-                logger.error(e.getMessage());
-                String exceptionString = String.format("Photo %s isn't uploaded to disk", file.getOriginalFilename());
-                logger.error(exceptionString);
-            } finally {
-                if (photo != null && !isSaved) {
-                    boolean isDeleted = storageService.deletePhoto(photo);
-                    if (isDeleted) {
-                        isOk = false;
-                        String exceptionString = String.format("Photo %s with identifier %d is deleted from disk",
-                                file.getOriginalFilename(), photo.getIdentifier());
-                        logger.info(exceptionString);
-                    } else{
-                        isOk = false;
-                        String exceptionString = String.format("Photo %s with identifier %d isn't deleted from disk",
-                                file.getOriginalFilename(), photo.getIdentifier());
-                        logger.error(exceptionString);
-                    }
-                }
+                LOGGER.error(String.format("Photo %s isn't uploaded to disk", file.getOriginalFilename()), e);
             }
         }
 
@@ -155,21 +119,26 @@ public class WorkController {
         } else {
             redirectAttributes.addFlashAttribute("operationStatus", "Download wasn't correct");
         }
-        return "redirect:/gallery/folder/{foldername}";
+        return "redirect:/gallery/folder/{folderName}";
     }
-
 
     @PostMapping("/photo/changedescription")
     public ResponseEntity<?> changeDescription(@RequestBody Photo photo) {
         boolean isChanged = DatasourceHelper.changeDescription(photoRepository, photo);
         if (isChanged) {
-            return ResponseEntity.ok("success");
+            return ResponseEntity.ok("{}");
         } else {
-            String exceptionString = String.format("Error in changing description to %s in photo with identifier %d",
-                    photo.getDescription(),
-                    photo.getIdentifier());
-            logger.error(exceptionString);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("error");
         }
+    }
+
+    @ExceptionHandler({ Exception.class})
+    public ModelAndView handleException(Exception e)
+    {
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("error");
+        modelAndView.addObject("message", "В программе произошла ошибка, обратитесь к администратору");
+        LOGGER.error(e.getMessage(), e);
+        return modelAndView;
     }
 }

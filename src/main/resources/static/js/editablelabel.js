@@ -1,55 +1,55 @@
 $('.holder').on('click', "label.editable", function () {
-    var $lbl = $(this), o = $lbl.text(),
-        $txt = $('<input type="text" class="editable" align="right" value=' + o + ' />');
+    var $lbl = $(this),
+        oldDescription = $lbl.text().trim(),
+        $txt = $('<input type="text" class="editable" align="right" value=' + oldDescription + ' />');
     $lbl.replaceWith($txt);
     $txt.focus();
 
     $txt.blur(function () {
-        var newdescription = $(this).val();
-        if (newdescription == null || newdescription == "") {
-            $lbl.text("Введите описание");
-        } else {
-            $lbl.text(newdescription);
-        }
-        $txt.replaceWith($lbl);
-        change_description($lbl.parent(), newdescription);
+        setNewDescription(oldDescription, $(this).val().trim(), $lbl, $txt);
     })
         .keydown(function (evt) {
             if (evt.keyCode === 13) {
-                var newdescription = $(this).val();
-                if (newdescription == null || newdescription == "") {
-                    $lbl.text("Введите описание");
-                } else {
-                    $lbl.text(newdescription);
-                }
-                $txt.replaceWith($lbl);
-                change_description($lbl.parent(), newdescription);
+                setNewDescription(oldDescription, $(this).val().trim(), $lbl, $txt);
             }
         });
 });
 
-function change_description(parentNode, newdescription) {
-    var photo = {}
-    photo["identifier"] = parentNode.attr('id');
-    photo["description"] = newdescription;
-    var errorNode = parentNode[0].querySelector('.operationStatusClass');
+function setNewDescription(oldDescription, newDescription, labelElement, textElement) {
+    if (newDescription == null || newDescription == "") {
+        labelElement.text("Введите описание");
+    } else {
+        labelElement.text(newDescription);
+    }
+    textElement.replaceWith(labelElement);
+    change_description(labelElement.parent(), oldDescription, newDescription);
+}
 
-    $.ajax({
-        type: "POST",
-        contentType: "application/json",
-        url: "/photo/changedescription/",
-        data: JSON.stringify(photo),
-        dataType: 'json',
-        cache: false,
-        timeout: 600000,
-        success: function (data) {
-            console.log("SUCCESS : ", data);
-            errorNode.innerHTML = "Description is changed!";
-        },
-        error: function (e) {
-            console.log("ERROR : ", e);
-            errorNode.innerHTML = "Error in changing description!";
-        }
-    });
+function change_description(parentNode, oldDescription, newDescription) {
+
+    if (newDescription != oldDescription && newDescription != "Введите описание") {
+        var photo = {}
+        photo["identifier"] = parentNode.attr('id');
+        photo["description"] = newDescription;
+        var errorNode = parentNode[0].querySelector('.operationStatusClass');
+
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: "/photo/changedescription/",
+            data: JSON.stringify(photo),
+            dataType: 'json',
+            cache: false,
+            timeout: 600000,
+            success: function (data) {
+                console.log("SUCCESS : ", data);
+                errorNode.innerHTML = "Description is changed!";
+            },
+            error: function (e) {
+                console.log("ERROR : ", e);
+                errorNode.innerHTML = "Error in changing description!";
+            }
+        });
+    }
 }
 

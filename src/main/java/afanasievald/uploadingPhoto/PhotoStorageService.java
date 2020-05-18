@@ -21,7 +21,7 @@ public class PhotoStorageService implements StorageService {
     private final String photoLocation;
 
     @NotNull
-    private final Logger logger = LogManager.getLogger(PhotoStorageService.class.getName());
+    private final Logger LOGGER = LogManager.getLogger(PhotoStorageService.class.getName());
 
     @Autowired
     public PhotoStorageService(StorageProperties properties) throws IOException {
@@ -31,9 +31,8 @@ public class PhotoStorageService implements StorageService {
             Files.createDirectories(photoLocationPath);
         } else {
             if (!Files.isDirectory(photoLocationPath)) {
-                String exceptionString = String.format("Application is closed, because photoLocationPath %s isn't directory", this.photoLocation);
-                logger.error(exceptionString);
-                throw new IllegalArgumentException(exceptionString);
+                LOGGER.error(String.format("Application is closed, because photoLocationPath %s isn't directory", this.photoLocation));
+                throw new IllegalArgumentException(String.format("Application is closed, because photoLocationPath %s isn't directory", this.photoLocation));
             }
         }
     }
@@ -44,22 +43,19 @@ public class PhotoStorageService implements StorageService {
         Photo photo = new Photo();
         try {
             String mimeType = Files.probeContentType(fileNameAndPath);
-            if (!mimeType.startsWith("image/")) {
-                String exceptionString = String.format("File %s isn't image", fileNameAndPath);
-                logger.error(exceptionString);
+            if (mimeType == null || !mimeType.startsWith("image/")) {
+                LOGGER.info(String.format("File %s isn't image", fileNameAndPath));
                 return null;
             }
 
             byte[] normalizedByteArray = ImageRotation.normalizeOrientation(byteArray);
-
             photo.setIdentifier(Arrays.hashCode(byteArray) + (new Date()).hashCode());
             String fileExtension = Objects.requireNonNull(fileName).split("\\.")[1];
             photo.setName(String.format("%s.%s", photo.getIdentifier(), fileExtension));
-
             Path newFileNameAndPath = Paths.get(photoLocation, photo.getName());
             Files.write(newFileNameAndPath, normalizedByteArray);
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            LOGGER.error(e.getMessage(), e);
             return null;
         }
         return photo;
@@ -69,14 +65,15 @@ public class PhotoStorageService implements StorageService {
     public boolean deletePhoto(@NotNull Photo photo){
         Path fileNameAndPath = Paths.get(photoLocation, photo.getName());
         if (!Files.exists(fileNameAndPath)) {
-            String exceptionString = String.format("Photo %s doesn't exist", fileNameAndPath.toString());
-            logger.error(exceptionString);
+            LOGGER.info(String.format("Photo %s doesn't exist", fileNameAndPath.toString()));
             return false;
         }
         try {
             Files.delete(fileNameAndPath);
+
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            LOGGER.error(String.format("Photo %s with identifier %d isn't deleted from disk",
+                    fileNameAndPath.toString(), photo.getIdentifier()), e);
             return false;
         }
 
@@ -87,35 +84,31 @@ public class PhotoStorageService implements StorageService {
     public byte[] loadPhotoAsResource(@NotNull PhotoRepository photoRepository, long identifier){
         Optional<Photo> photo = photoRepository.findByIdentifier(identifier);
         if (!photo.isPresent()) {
-            String exceptionString = String.format("Photo with identifier %d doesn't exist", identifier);
-            logger.error(exceptionString);
+            LOGGER.info(String.format("Photo with identifier %d doesn't exist", identifier));
             return null;
         }
 
         String fileName = photo.get().getName();
         if (fileName.isEmpty()) {
-            String exceptionString = String.format("Photo %s is empty", fileName);
-            logger.error(exceptionString);
+            LOGGER.info(String.format("Photo %s is empty", fileName));
             return null;
         }
 
         try {
             Path filePath = Paths.get(photoLocation, fileName);
             if (!Files.exists(filePath)) {
-                String exceptionString = String.format("File %s doesn't exist", filePath);
-                logger.error(exceptionString);
+                LOGGER.info(String.format("File %s doesn't exist", filePath));
                 return null;
             }
 
             if (!Files.isReadable(filePath)) {
-                String exceptionString = String.format("File %s isn't readable", filePath);
-                logger.error(exceptionString);
+                LOGGER.info(String.format("File %s isn't readable", filePath));
                 return null;
             }
 
             return Files.readAllBytes(filePath);
         } catch (InvalidPathException | IOException e) {
-            logger.error(e.getMessage());
+            LOGGER.error(e.getMessage(), e);
             return null;
         }
     }

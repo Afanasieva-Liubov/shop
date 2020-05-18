@@ -1,0 +1,39 @@
+
+1. handleException тесты нужны?
+2. PhotoStorageService test
+    1)/*public byte[] loadPhotoAsResource(@NotNull PhotoRepository photoRepository, long identifier){
+        try {
+            Path filePath = Paths.get(photoLocation, fileName);
+            if (!Files.isReadable(filePath)) { //нет прав,
+                return null;
+                https://stackoverflow.com/questions/1198517/manipulating-windows-file-permissions-in-java
+               exec - выполнить любую команду из консоли, подождать
+            }
+
+        } catch (IOException e) {
+            return null;
+        }
+    }*/
+
+    3)
+
+      /*  public Photo uploadPhotos(@NotNull String fileName, @NotNull byte[] byteArray){
+            try {
+
+            } catch (IOException e) {
+                return null;
+            }
+        }*/
+
+            public boolean deletePhoto(@NotNull Photo photo){
+
+                try {
+                    Files.delete(fileNameAndPath);
+
+                } catch (IOException e) {
+                    return false;
+                }
+
+            }
+
+

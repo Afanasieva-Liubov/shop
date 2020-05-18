@@ -18,7 +18,7 @@ import java.io.IOException;
 
 public class ImageRotation {
     @NotNull
-    private static final Logger logger = LogManager.getLogger(ImageRotation.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger(ImageRotation.class.getName());
 
     private static ImageInformation readImageInformation(@NotNull byte[] byteArray) {
         try {
@@ -27,8 +27,7 @@ public class ImageRotation {
             JpegDirectory jpegDirectory = metadata.getFirstDirectoryOfType(JpegDirectory.class);
 
             if (directory == null) {
-                String exceptionString = "Directory is null";
-                logger.warn(exceptionString);
+                LOGGER.info("Directory is null");
                 return null;
             }
 
@@ -38,7 +37,7 @@ public class ImageRotation {
 
             return new ImageInformation(orientation, width, height);
         } catch (MetadataException | ImageProcessingException | IOException e) {
-            logger.error(e.getMessage());
+            LOGGER.error(e.getMessage(), e);
             return null;
         }
     }
